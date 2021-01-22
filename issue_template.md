@@ -6,11 +6,11 @@ Provide a detailed description of this issue.
 
 What problem needs to be fixed? What new capability needs to be added?
 
-[Be sure to add a Pipeline, Label, Estimate, Assignees, and Epic](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/inside/practices/issues.html) for further information
+[Be sure to add a Pipeline, Label, Estimate, Assignees, and Epic](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/inside/practices/issues.html)
 
 ## Requirements
 
-What does the new code need to achieve?
+What does the new code need to accomplish?
 
 ## Acceptance Criteria (Definition of Done)
 
