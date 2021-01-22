@@ -1,14 +1,21 @@
 ## Description
 
-(Instructions: this, and all subsequent sections of text should be removed and filled in as appropriate.)
+*(Instructions: replace text in this and all sections with your own text)*
+
 Provide a detailed description of what this PR does.
-What bug does it fix, or what feature does it add?
-Is a change of answers expected from this PR?
+
+What problem does it fix? What new capability does it add?
+
+[See the JEDI Documentation](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/inside/practices/pullrequest.html) for further information.
 
 ### Issue(s) addressed
 
 Link the issues to be closed with this PR
 - fixes #<issue_number>
+
+## Acceptance Criteria (Definition of Done)
+
+What does it mean for this PR to be finished?
 
 ## Dependencies
 
@@ -18,6 +25,8 @@ Waiting on the following PRs:
 - waiting on JCSDA/atlas/pull/<pr_number>
 
 ## Impact
+
+Is a change of answers expected from this PR for this or other repositories?
 
 If changes in this PR will affect other repositories, please add a "waiting for other repos" label, and list the repositories that will be affected to the best of your knowledge (example below).
 Requires changes in the following repositories:
@@ -32,5 +41,8 @@ Requires updating AWS test data for the following repositories:
 - [ ] ioda
 - [ ] ...
 
-Note: to automatically run saber, ioda and ufo tests with this PR, push a commit containing "trigger pipeline", e.g.:
+Note: to automatically run tests for dependent repos, push a commit containing "trigger pipeline", e.g. (not available for all repos):
+
+```bash
 git commit --allow-empty -m 'trigger pipeline'
+```
