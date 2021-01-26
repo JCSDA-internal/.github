@@ -40,9 +40,3 @@ Requires updating AWS test data for the following repositories:
 - [ ] saber
 - [ ] ioda
 - [ ] ...
-
-Note: to automatically run tests for dependent repos, push a commit containing "trigger pipeline", e.g. (*Note* - this requires that you have access to JCSDA's AWS account and even then, it is not available for all repos):
-
-```bash
-git commit --allow-empty -m 'trigger pipeline'
-```
