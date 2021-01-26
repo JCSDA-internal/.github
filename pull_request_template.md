@@ -26,17 +26,16 @@ Waiting on the following PRs:
 
 ## Impact
 
-Is a change of answers expected from this PR for this or other repositories?
+Please list the other repositories (if any) that this PR will require changes in (example below)
 
-If changes in this PR will affect other repositories, please add a "waiting for other repos" label, and list the repositories that will be affected to the best of your knowledge (example below).
-Requires changes in the following repositories:
-- [ ] saber
-- [ ] ioda
-- [ ] ufo
-- [ ] ...
+- saber
+- ufo
+- ...
 
-If changes in this PR require updating test data on AWS please add an "update test data" label and list the test data that needs to be updated to the best of your knowledge (example below).
-Requires updating AWS test data for the following repositories:
-- [ ] saber
-- [ ] ioda
-- [ ] ...
+## Test Data
+
+Please list the test data (if any) that needs to be updated on AWS to the best of your knowledge (example below).
+
+- saber
+- ioda
+- ...
