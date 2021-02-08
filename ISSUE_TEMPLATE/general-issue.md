@@ -1,3 +1,12 @@
+---
+name: General issue template
+about: Use this template for general issues
+title: "[New issue]"
+labels: ''
+assignees: ''
+
+---
+
 ## Description
 
 *(Instructions: replace text in this and all sections with your own text)*
@@ -6,7 +15,7 @@ Provide a detailed description of this issue.
 
 What problem needs to be fixed? What new capability needs to be added?
 
-If this is a bug, describe the current behavior.
+If this is a bug, describe the current behavior (or use the bug template).
 
 [Be sure to add a Pipeline, Label, Estimate, Assignees, and Epic](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/inside/practices/issues.html)
 
