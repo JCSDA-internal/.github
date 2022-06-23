@@ -2,22 +2,15 @@
 
 *(Instructions: replace text in this and all sections with your own text)*
 
-Provide a detailed description of what this PR does.
+Provide a detailed description of what this PR does. What problem does it fix? What new capability does it add?
 
-What problem does it fix? What new capability does it add?
+## Issue(s) addressed
 
-[See the JEDI Documentation](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/inside/practices/pullrequest.html) for further information.
+Fixes #<issue_number>
 
-### Issue(s) addressed
+## Documentation
 
-Link the issues to be closed with this PR
-- fixes #<issue_number>
-
-If this does not close an existing issue, then [be sure to add a Pipeline, Label, Estimate, Assignees, and Epic](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/inside/practices/issues.html)
-
-## Acceptance Criteria (Definition of Done)
-
-What does it mean for this PR to be finished?
+Please make sure that documentation is up-to-date with these changes. Issue PRs in JCSDA-internal/jedi-docs to update documentation.
 
 ## Dependencies
 
