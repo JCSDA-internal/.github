@@ -19,3 +19,4 @@ Expected impact on downstream repositories:
 
 - [ ] I have performed a self-review of my own code
 - [ ] I have made corresponding changes to the documentation
+- [ ] I have run the unit tests before creating the PR
