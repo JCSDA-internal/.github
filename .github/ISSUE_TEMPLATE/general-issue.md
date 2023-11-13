@@ -1,7 +1,7 @@
 ---
 name: General issue template
 about: Use this template for general issues
-title: "[New issue]"
+title: ""
 labels: ''
 assignees: ''
 
