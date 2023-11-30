@@ -17,6 +17,8 @@ Data type (_For example, observation, forecast_):
 
 Other metadata (_For example, provider, observation type, model_): 
 
+Timeline (_When does this issue need to be completed_):
+
 ## Date range
 
 Start date: 
