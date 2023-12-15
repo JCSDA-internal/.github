@@ -36,6 +36,7 @@ Data store directory path or S3 bucket path (_with wildcards if needed_):
 - [ ] archive
 - [ ] experiments
 - [ ] gfs ensemble
+- [ ] geos ensemble
 - [ ] other 
     - Please describe: 
 
@@ -43,7 +44,8 @@ Data store directory path or S3 bucket path (_with wildcards if needed_):
 
 Data copied into R2D2 on:
 
-- [ ] Cheyenne
+- [ ] AWS ParallelCluster R&D
+- [ ] Casper/Derecho
 - [ ] Discover
 - [ ] Orion
 - [ ] S3 (us-east-1)
