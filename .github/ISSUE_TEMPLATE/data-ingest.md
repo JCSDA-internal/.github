@@ -47,7 +47,7 @@ Data copied into R2D2 on:
 - [ ] AWS ParallelCluster R&D
 - [ ] Casper/Derecho
 - [ ] Discover
-- [ ] Orion
+- [ ] Orion/Hercules
 - [ ] S3 (us-east-1)
 - [ ] S3 (us-east-2)
 - [ ] S4
