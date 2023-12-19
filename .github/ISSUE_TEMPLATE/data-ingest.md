@@ -31,7 +31,7 @@ Source host:
 
 Source data store:
 
-## Target data store type (select one) 
+## Target data store type (select one)
 
 - [ ] archive
 - [ ] experiments
