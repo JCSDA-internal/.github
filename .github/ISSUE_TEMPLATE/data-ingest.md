@@ -13,9 +13,9 @@ assignees: ''
 
 Description: 
 
-Data type (_For example, observation, forecast_):
+Data type (_For example: observation, forecast_):
 
-Other metadata (_For example, provider, observation type, model_): 
+Other metadata (_For example: provider, observation_type, model_): 
 
 Timeline (_When does this issue need to be completed_):
 
@@ -25,30 +25,32 @@ Start date:
 
 End date:
 
-## Source host and directory/bucket
+## Source host and data store
 
 Source host: 
 
-Data store directory path or S3 bucket path (_with wildcards if needed_):
+Source data store:
 
 ## Target data store type (select one)
 
 - [ ] archive
 - [ ] experiments
-- [ ] gfs ensemble
+- [ ] gfsensemble
+- [ ] geosensemble
 - [ ] other 
     - Please describe: 
 
-## Data store checklist
+## Data ingest processing checklist for the R2D2 Administrator
 
-Data copied into R2D2 on:
+Data has been ingested into the target data store type on the following data hubs:
 
-- [ ] Cheyenne
-- [ ] Discover
-- [ ] Orion
-- [ ] S3 (us-east-1)
-- [ ] S3 (us-east-2)
-- [ ] S4
+- [ ] AWS ParallelCluster R&D
+- [ ] Casper/Derecho (NCAR-Wyoming Supercomputing Center)
+- [ ] Discover (NASA Center for Climate Simulation)
+- [ ] Orion/Hercules (Mississippi State University High Performance Computing)
+- [ ] S3 (jcsda-noaa-aws-us-east-1)
+- [ ] S3 (jcsda-usaf-aws-us-east-2)
+- [ ] S4 (Space Science and Engineering Center)
 
 ## Associated pull request in [r2d2/scripts](https://github.com/JCSDA-internal/r2d2/tree/develop/scripts) (if creating new ingestion scripts)
 
