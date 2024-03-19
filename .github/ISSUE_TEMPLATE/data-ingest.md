@@ -9,7 +9,7 @@ assignees: ''
 
 ## Ingest description
 
-*(Instructions: Please provide values for the following entries.)*
+**Instructions:** Please provide values for the following entries and set the experiment lifetime for the data to be ingested to "science" to avoid it being scrubbed (see instructions at the end of this template for more information). Then delete this line.
 
 Description: 
 
@@ -44,14 +44,18 @@ Source data store:
 
 Data has been ingested into the target data store type on the following data hubs:
 
-- [ ] AWS ParallelCluster R&D
+- [ ] ~~AWS ParallelCluster R&D~~ (temporarily suspended)
 - [ ] Casper/Derecho (NCAR-Wyoming Supercomputing Center)
 - [ ] Discover (NASA Center for Climate Simulation)
 - [ ] Orion/Hercules (Mississippi State University High Performance Computing)
-- [ ] S3 (jcsda-noaa-aws-us-east-1)
 - [ ] S3 (jcsda-usaf-aws-us-east-2)
 - [ ] S4 (Space Science and Engineering Center)
+- [ ] NOAA ParallelWorks Gcloud
 
-## Associated pull request in [r2d2/scripts](https://github.com/JCSDA-internal/r2d2/tree/develop/scripts) (if creating new ingestion scripts)
+## Instructions for changing the lifetime of an experiment
 
-*(This instruction will change once we create the r2d2-ingest repository.)*
+This changes the lifetime of experiment `b00b7f` from the default `debug` to `science`:
+```
+from r2d2 import R2D2Index
+R2D2Index.update(item='experiment', name='b00b7f', key='lifetime', value='science')
+```
