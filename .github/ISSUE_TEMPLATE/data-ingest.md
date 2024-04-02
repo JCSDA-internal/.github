@@ -19,9 +19,15 @@ Other metadata (_For example: provider, observation_type, model_):
 
 Timeline (_When does this issue need to be completed_):
 
+## Data quality certification
+
+Data ingest requests will not be processed until the following statement is checked. 
+
+- [ ] I certify that this data set has been checked for errors (including malformed or missing data) and tested using Skylab. 
+
 ## Date range
 
-Start date: 
+Start date:
 
 End date:
 
