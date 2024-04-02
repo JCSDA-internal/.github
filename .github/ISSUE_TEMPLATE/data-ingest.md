@@ -23,7 +23,7 @@ Timeline (_When does this issue need to be completed_):
 
 Data ingest requests will not be processed until the following statement is checked. 
 
-- [ ] I certify that this data set has been checked for errors (including malformed or missing data) and tested using Skylab across the entire ingest data range. 
+- [ ] I certify that this data set has been checked for errors (including malformed or missing data) and tested using Skylab across the entire ingest date range. 
 
 ## Date range
 
