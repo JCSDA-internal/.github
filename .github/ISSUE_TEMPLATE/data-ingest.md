@@ -19,9 +19,13 @@ Other metadata (_For example: provider, observation_type, model_):
 
 Timeline (_When does this issue need to be completed_):
 
+## Data quality certification
+
+- [ ] I certify that this data set has been checked for errors (including malformed or missing data) and tested using Skylab across the entire ingest data range. 
+
 ## Date range
 
-Start date: 
+Start date:
 
 End date:
 
