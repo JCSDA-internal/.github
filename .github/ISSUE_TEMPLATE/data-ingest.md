@@ -15,7 +15,7 @@ Description:
 
 Data type (_For example: observation, forecast_):
 
-**Full** (_remove all files in store first and copy in full set of new data_) or **Partial** (`cp` _over existing files_) ingest:
+**Full** (_remove all files in store first and copy in full set of new data_) or **Partial** (`cp` _over subset of existing files_) ingest:
 
 Other metadata (_For example: provider, observation_type, model_): 
 
