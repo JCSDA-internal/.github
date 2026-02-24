@@ -1,0 +1,242 @@
+name: Helpdesk Request
+description: Support request for build/config/runtime/performance/science questions (stats-friendly)
+title: "[Helpdesk] "
+labels: ["helpdesk"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Use this form for support requests.**
+        If this is a confirmed software defect with a clear reproducer, consider using the **Bug Report** template instead.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One sentence description of the issue/question.
+      placeholder: "Example: Unable to build ioda-converters on Hera using jedi-bundle; ecbuild not found."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Issue category (required for stats)
+      description: Choose the best match.
+      options:
+        - Build / environment
+        - Runtime error
+        - Configuration question
+        - Scientific / methodology question
+        - Performance / scaling
+        - Upgrade / compatibility
+        - Documentation clarification
+        - Access / permissions
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact / priority
+      options:
+        - Blocking work
+        - High (major slowdown)
+        - Medium
+        - Low
+        - Question / informational
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproducible
+    attributes:
+      label: Reproducibility
+      options:
+        - Always reproducible
+        - Intermittent
+        - Not reproducible (yet)
+        - Not applicable (question/advice)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: platform
+    attributes:
+      label: Platform / system (select all that apply)
+      options:
+        - label: Hera
+        - label: Orion
+        - label: Gaea
+        - label: AWS / Cloud
+        - label: Local workstation
+        - label: Container / Singularity / Docker
+        - label: Other (specify below)
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment details
+      description: Provide enough info to reproduce or reason about your setup.
+      placeholder: |
+        System:
+        OS (if known):
+        Compiler + version:
+        MPI (if relevant):
+        Modules loaded / environment:
+        Python version (if relevant):
+        Build type (Release/Debug):
+        Repo(s) + branch/hash/tag:
+        How installed (bundle/spack/conda/manual):
+    validations:
+      required: false
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      description: Context helps resolve issues faster (especially for configuration/science questions).
+      placeholder: |
+        Goal:
+        Workflow/app:
+        Observations/models involved (if applicable):
+        Expected outcome:
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce (if applicable)
+      placeholder: |
+        1) ...
+        2) ...
+        3) ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior / logs
+      description: Paste the error output or relevant log excerpt. Include stack traces if available.
+      render: shell
+      placeholder: "Paste logs here…"
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "What did you expect to happen instead?"
+    validations:
+      required: false
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried already?
+      description: Helps avoid repeating steps and speeds triage.
+      placeholder: "- Rebuilt with clean build dir\n- Tried different compiler\n- Followed README steps\n..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Links / configs / artifacts
+      description: Add links to configs, logs, minimal reproducer repo, etc.
+      placeholder: |
+        - YAML/config:
+        - Log file:
+        - Related issue/PR:
+        - Dataset/sample:
+    validations:
+      required: false
+
+  - type: dropdown
+    id: estimate
+    attributes:
+      label: Requester estimate (optional)
+      description: If you have a sense of effort for support/engineering work, select one.
+      options:
+        - ""
+        - 0.1 (quick question)
+        - 0.25
+        - 0.5
+        - 1
+        - 2
+        - 4
+        - 8
+        - 10+
+    validations:
+      required: false
+
+  - type: input
+    id: needed_by
+    attributes:
+      label: Needed by (optional)
+      description: Provide a date/timeframe if there is urgency.
+      placeholder: "e.g., Feb 29, or 'this week'"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## Maintainers (fill in after triage)
+        The fields below support reporting (time-to-resolution, root cause, documentation debt).  
+        You can leave them blank when opening the issue.
+
+  - type: dropdown
+    id: maintainer_category
+    attributes:
+      label: Maintainer classification
+      options:
+        - ""
+        - Helpdesk (question/guidance)
+        - Bug (defect)
+        - Feature (enhancement)
+        - Research (methodology/design)
+        - Docs (documentation)
+        - Tracking (coordination)
+    validations:
+      required: false
+
+  - type: dropdown
+    id: root_cause
+    attributes:
+      label: Root cause (maintainers)
+      options:
+        - ""
+        - User setup / environment
+        - Configuration / YAML
+        - Documentation gap
+        - Code defect
+        - Infrastructure/HPC
+        - External dependency
+        - Expected behavior / not a bug
+        - Other
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: docs_debt
+    attributes:
+      label: Documentation follow-up (maintainers)
+      options:
+        - label: Docs update needed
+        - label: FAQ candidate (recurring question)
+
+  - type: textarea
+    id: resolution
+    attributes:
+      label: Resolution summary (maintainers)
+      description: What fixed it? Include links to PRs, commits, or guidance.
+      placeholder: "Root cause + fix/workaround + references"
+    validations:
+      required: false
