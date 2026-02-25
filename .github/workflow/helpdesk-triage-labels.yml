@@ -1,1 +1,102 @@
+name: Helpdesk triage → labels
 
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  issues: write
+
+jobs:
+  apply-labels:
+    # Only act on helpdesk issues (your template already adds this label)
+    if: contains(github.event.issue.labels.*.name, 'helpdesk')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Parse issue form fields and apply labels
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+
+            const body = context.payload.issue.body || "";
+
+            function extractFieldValue(sectionTitle) {
+              // Looks for:
+              // ### <sectionTitle>
+              // <value>
+              const re = new RegExp(`^###\\s+${sectionTitle.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\s*\\n+([^\\n]+)`, "m");
+              const m = body.match(re);
+              if (!m) return "";
+              return (m[1] || "").trim();
+            }
+
+            function normalizeLabelPrefix(prefix, value) {
+              if (!value) return "";
+              const v = value
+                .toLowerCase()
+                .trim()
+                .replace(/[\u200b-\u200d\uFEFF]/g, "") // zero-width
+                .replace(/[()]/g, "")
+                .replace(/[\/]/g, "-")
+                .replace(/\s+/g, "-")
+                .replace(/[^a-z0-9._-]/g, "");
+              if (!v) return "";
+              return `${prefix}:${v}`;
+            }
+
+            const maintainerCategory = extractFieldValue("Maintainer classification");
+            const rootCause = extractFieldValue("Root cause (maintainers)");
+
+            // docs_debt is checkboxes; GitHub issue form typically renders checked boxes as:
+            // - [x] Docs update needed
+            // - [ ] FAQ candidate ...
+            const docsUpdateNeeded = /- \[x\]\s+Docs update needed/i.test(body);
+            const faqCandidate = /- \[x\]\s+FAQ candidate/i.test(body);
+
+            const desired = new Set();
+
+            // Map maintainer_category -> triage:<...>
+            // Values from your form: Helpdesk, Bug, Feature, Research, Docs, Tracking
+            const triage = normalizeLabelPrefix("triage", maintainerCategory);
+            if (triage) desired.add(triage);
+
+            // Map root cause -> root:<...>
+            const root = normalizeLabelPrefix("root", rootCause);
+            if (root) desired.add(root);
+
+            // docs debt flags
+            if (docsUpdateNeeded) desired.add("docs:needed");
+            if (faqCandidate) desired.add("docs:faq");
+
+            // Always keep helpdesk
+            desired.add("helpdesk");
+
+            // Fetch existing labels
+            const existing = (context.payload.issue.labels || []).map(l => l.name);
+
+            // We'll remove any previous triage:/root:/docs: labels we manage, then add desired.
+            const managedPrefixes = ["triage:", "root:", "docs:"];
+            const toRemove = existing.filter(name =>
+              managedPrefixes.some(p => name.startsWith(p)) && !desired.has(name)
+            );
+
+            // Remove old managed labels
+            for (const name of toRemove) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              } catch (e) {
+                // ignore if already removed
+              }
+            }
+
+            // Add missing desired labels
+            const toAdd = [...desired].filter(name => !existing.includes(name));
+            if (toAdd.length) {
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: toAdd });
+            }
+
+            core.info(`Applied labels. Added: ${toAdd.join(", ") || "(none)"} Removed: ${toRemove.join(", ") || "(none)"}`);
