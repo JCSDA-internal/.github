@@ -1,1 +1,164 @@
+name: Helpdesk weekly stats report
 
+on:
+  schedule:
+    - cron: "0 13 * * 1" # Mondays 13:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  issues: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate CSV report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          python - <<'PY'
+          import os, csv, datetime, statistics, re, requests
+
+          owner = os.environ["OWNER"]
+          repo  = os.environ["REPO"]
+          token = os.environ["GH_TOKEN"]
+
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+          }
+
+          def gh_get(url, params=None):
+              r = requests.get(url, headers=headers, params=params, timeout=60)
+              r.raise_for_status()
+              return r.json(), r.links.get("next", {}).get("url")
+
+          def days_between(a, b):
+              return (b - a).total_seconds() / 86400.0
+
+          # Pull all issues with label helpdesk (open + closed), excluding PRs
+          issues = []
+          url = f"https://api.github.com/repos/{owner}/{repo}/issues"
+          params = {"state": "all", "labels": "helpdesk", "per_page": 100}
+          while True:
+              data, next_url = gh_get(url, params=params)
+              for it in data:
+                  if "pull_request" in it:
+                      continue
+                  issues.append(it)
+              if not next_url:
+                  break
+              url = next_url
+              params = None
+
+          now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+
+          # Aggregate stats from labels applied by the other workflow
+          triage_counts = {}
+          root_counts = {}
+          docs_needed = 0
+          docs_faq = 0
+
+          # Cycle times
+          time_to_close = []
+          opened_count = 0
+          closed_count = 0
+
+          # Weekly created counts (ISO week)
+          created_by_week = {}
+
+          for it in issues:
+              labels = [l["name"] for l in it.get("labels", [])]
+              created = datetime.datetime.fromisoformat(it["created_at"].replace("Z", "+00:00"))
+              closed_at = it.get("closed_at")
+              closed = datetime.datetime.fromisoformat(closed_at.replace("Z", "+00:00")) if closed_at else None
+
+              opened_count += 1
+              if closed:
+                  closed_count += 1
+                  time_to_close.append(days_between(created, closed))
+
+              # week bucket
+              iso_year, iso_week, _ = created.isocalendar()
+              created_by_week.setdefault((iso_year, iso_week), 0)
+              created_by_week[(iso_year, iso_week)] += 1
+
+              for ln in labels:
+                  if ln.startswith("triage:"):
+                      triage_counts[ln] = triage_counts.get(ln, 0) + 1
+                  if ln.startswith("root:"):
+                      root_counts[ln] = root_counts.get(ln, 0) + 1
+
+              if "docs:needed" in labels:
+                  docs_needed += 1
+              if "docs:faq" in labels:
+                  docs_faq += 1
+
+          def summary_stats(values):
+              if not values:
+                  return {"n": 0, "mean": "", "median": "", "p90": ""}
+              s = sorted(values)
+              def p90(arr):
+                  # nearest-rank p90
+                  k = max(1, int(round(0.9 * len(arr) + 0.0000001)))
+                  return arr[min(len(arr)-1, k-1)]
+              return {
+                  "n": len(values),
+                  "mean": round(statistics.mean(values), 2),
+                  "median": round(statistics.median(values), 2),
+                  "p90": round(p90(s), 2),
+              }
+
+          ttc = summary_stats(time_to_close)
+
+          # Write CSVs
+          os.makedirs("helpdesk_stats", exist_ok=True)
+
+          # 1) overall summary
+          with open("helpdesk_stats/summary.csv", "w", newline="", encoding="utf-8") as f:
+              w = csv.writer(f)
+              w.writerow(["metric", "value"])
+              w.writerow(["total_issues", opened_count])
+              w.writerow(["closed_issues", closed_count])
+              w.writerow(["open_issues", opened_count - closed_count])
+              w.writerow(["docs_needed_count", docs_needed])
+              w.writerow(["docs_faq_count", docs_faq])
+              w.writerow(["time_to_close_n", ttc["n"]])
+              w.writerow(["time_to_close_days_mean", ttc["mean"]])
+              w.writerow(["time_to_close_days_median", ttc["median"]])
+              w.writerow(["time_to_close_days_p90", ttc["p90"]])
+              w.writerow(["generated_at_utc", now.isoformat()])
+
+          # 2) triage counts
+          with open("helpdesk_stats/by_triage.csv", "w", newline="", encoding="utf-8") as f:
+              w = csv.writer(f)
+              w.writerow(["triage_label", "count"])
+              for k, v in sorted(triage_counts.items(), key=lambda kv: (-kv[1], kv[0])):
+                  w.writerow([k, v])
+
+          # 3) root cause counts
+          with open("helpdesk_stats/by_root_cause.csv", "w", newline="", encoding="utf-8") as f:
+              w = csv.writer(f)
+              w.writerow(["root_label", "count"])
+              for k, v in sorted(root_counts.items(), key=lambda kv: (-kv[1], kv[0])):
+                  w.writerow([k, v])
+
+          # 4) volume by week
+          with open("helpdesk_stats/created_by_week.csv", "w", newline="", encoding="utf-8") as f:
+              w = csv.writer(f)
+              w.writerow(["iso_year", "iso_week", "created_count"])
+              for (y, wk), c in sorted(created_by_week.items()):
+                  w.writerow([y, wk, c])
+
+          print("Wrote helpdesk_stats/*.csv")
+          PY
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: helpdesk-weekly-stats
+          path: helpdesk_stats
