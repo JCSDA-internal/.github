@@ -1,8 +1,8 @@
 name: Helpdesk Request
-description: Support request for build/config/runtime/performance/science questions (stats-friendly)
+description: Support request for build/config/runtime/performance/science questions
 title: "[Helpdesk] "
 labels: ["helpdesk"]
-assignees: []
+assignees: [gibbsp]
 body:
   - type: markdown
     attributes:
