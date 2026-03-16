@@ -127,8 +127,8 @@ body:
   #    description: Paste the error output or relevant log excerpt. Include stack traces if available.
   #    render: shell
   #    placeholder: "Paste logs here…"
-  #  validations:
-  #    required: false
+    validations:
+    required: false
 
   # - type: textarea
   #  id: expected
