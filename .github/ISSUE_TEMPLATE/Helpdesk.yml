@@ -30,7 +30,8 @@ body:
         # - Configuration question
         # - Scientific / methodology question
         - Performance / scaling
-        - Upgrade # / compatibility
+        - Upgrade 
+        # / compatibility
         - Documentation clarification
         # - Access / permissions
         - Other
