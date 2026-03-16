@@ -129,7 +129,7 @@ body:
   #    render: shell
   #    placeholder: "Paste logs here…"
     validations:
-    required: false
+      required: false
 
   # - type: textarea
   #  id: expected
