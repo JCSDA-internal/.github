@@ -70,7 +70,7 @@ body:
       options:
         # - label: Hera
         - label: Orion
-        - Label: Discover
+        - label: Discover
         # - label: Gaea
         - label: AWS / Cloud
         - label: Local workstation
