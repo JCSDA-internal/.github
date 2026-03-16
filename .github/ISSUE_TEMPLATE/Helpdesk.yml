@@ -161,23 +161,23 @@ body:
     validations:
       required: false
 
-  - type: dropdown
-    id: estimate
-    attributes:
-      label: Requester estimate (optional)
-      description: If you have a sense of effort for support/engineering work, select one.
-      options:
-        - ""
-        - 0.1 (quick question)
-        - 0.25
-        - 0.5
-        - 1
-        - 2
-        - 4
-        - 8
-        - 10+
-    validations:
-      required: false
+  #- type: dropdown
+  #  id: estimate
+  #  attributes:
+  #    label: Requester estimate (optional)
+  #    description: If you have a sense of effort for support/engineering work, select one.
+  #    options:
+  #      - ""
+  #      - 0.1 (quick question)
+  #      - 0.25
+  #      - 0.5
+  #      - 1
+  #      - 2
+  #      - 4
+  #      - 8
+  #      - 10+
+  #  validations:
+  #    required: false
 
   # - type: input
   #  id: needed_by
