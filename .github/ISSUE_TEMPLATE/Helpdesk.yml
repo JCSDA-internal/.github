@@ -25,14 +25,14 @@ body:
       label: Issue category (required for stats)
       description: Choose the best match.
       options:
-        - Build / environment
+        - Build / environment / compatability
         - Runtime error
-        - Configuration question
-        - Scientific / methodology question
+        # - Configuration question
+        # - Scientific / methodology question
         - Performance / scaling
-        - Upgrade / compatibility
+        - Upgrade # / compatibility
         - Documentation clarification
-        - Access / permissions
+        # - Access / permissions
         - Other
     validations:
       required: true
@@ -42,7 +42,7 @@ body:
     attributes:
       label: Impact / priority
       options:
-        - Blocking work
+        # - Blocking work
         - High (major slowdown)
         - Medium
         - Low
@@ -67,12 +67,13 @@ body:
     attributes:
       label: Platform / system (select all that apply)
       options:
-        - label: Hera
+        # - label: Hera
         - label: Orion
-        - label: Gaea
+        - Label: Discover
+        # - label: Gaea
         - label: AWS / Cloud
         - label: Local workstation
-        - label: Container / Singularity / Docker
+        # - label: Container / Singularity / Docker
         - label: Other (specify below)
 
   - type: textarea
@@ -120,35 +121,37 @@ body:
   - type: textarea
     id: observed
     attributes:
-      label: Observed behavior / logs
-      description: Paste the error output or relevant log excerpt. Include stack traces if available.
-      render: shell
-      placeholder: "Paste logs here…"
-    validations:
-      required: false
-
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected behavior
-      placeholder: "What did you expect to happen instead?"
-    validations:
-      required: false
-
-  - type: textarea
-    id: tried
-    attributes:
-      label: What have you tried already?
+      label: Observed behavior / What you tried already?
       description: Helps avoid repeating steps and speeds triage.
       placeholder: "- Rebuilt with clean build dir\n- Tried different compiler\n- Followed README steps\n..."
-    validations:
-      required: false
+  #    description: Paste the error output or relevant log excerpt. Include stack traces if available.
+  #    render: shell
+  #    placeholder: "Paste logs here…"
+  #  validations:
+  #    required: false
+
+  # - type: textarea
+  #  id: expected
+  #  attributes:
+  #    label: Expected behavior
+  #    placeholder: "What did you expect to happen instead?"
+  #  validations:
+  #    required: false
+
+  # - type: textarea
+  #  id: tried
+  #  attributes:
+  #    label: What have you tried already?
+  #    description: Helps avoid repeating steps and speeds triage.
+  #   placeholder: "- Rebuilt with clean build dir\n- Tried different compiler\n- Followed README steps\n..."
+  #  validations:
+  #    required: false
 
   - type: textarea
     id: links
     attributes:
-      label: Links / configs / artifacts
-      description: Add links to configs, logs, minimal reproducer repo, etc.
+      label: Observed behavior / Links / configs / artifacts
+      description: Add links to configs, logs, minimal reproducer repo, or paste the error output or relevant log excerpt, etc. 
       placeholder: |
         - YAML/config:
         - Log file:
@@ -175,68 +178,68 @@ body:
     validations:
       required: false
 
-  - type: input
-    id: needed_by
-    attributes:
-      label: Needed by (optional)
-      description: Provide a date/timeframe if there is urgency.
-      placeholder: "e.g., Feb 29, or 'this week'"
-    validations:
-      required: false
+  # - type: input
+  #  id: needed_by
+  #  attributes:
+  #    label: Needed by (optional)
+  #    description: Provide a date/timeframe if there is urgency.
+  #    placeholder: "e.g., Feb 29, or 'this week'"
+  #  validations:
+  #    required: false
 
-  - type: markdown
-    attributes:
-      value: |
-        ---
-        ## Maintainers (fill in after triage)
-        The fields below support reporting (time-to-resolution, root cause, documentation debt).  
-        You can leave them blank when opening the issue.
+  # - type: markdown
+  #  attributes:
+  #    value: |
+  #      ---
+  #      ## Maintainers (fill in after triage)
+  #      The fields below support reporting (time-to-resolution, root cause, documentation debt).  
+  #      You can leave them blank when opening the issue.
 
-  - type: dropdown
-    id: maintainer_category
-    attributes:
-      label: Maintainer classification
-      options:
-        - ""
-        - Helpdesk (question/guidance)
-        - Bug (defect)
-        - Feature (enhancement)
-        - Research (methodology/design)
-        - Docs (documentation)
-        - Tracking (coordination)
-    validations:
-      required: false
+  #- type: dropdown
+  #  id: maintainer_category
+  #  attributes:
+  #    label: Maintainer classification
+  #    options:
+  #      - ""
+  #      - Helpdesk (question/guidance)
+  #      - Bug (defect)
+  #      - Feature (enhancement)
+  #      - Research (methodology/design)
+  #      - Docs (documentation)
+  #      - Tracking (coordination)
+  #  validations:
+  #    required: false
 
-  - type: dropdown
-    id: root_cause
-    attributes:
-      label: Root cause (maintainers)
-      options:
-        - ""
-        - User setup / environment
-        - Configuration / YAML
-        - Documentation gap
-        - Code defect
-        - Infrastructure/HPC
-        - External dependency
-        - Expected behavior / not a bug
-        - Other
-    validations:
-      required: false
+  #- type: dropdown
+  #  id: root_cause
+  #  attributes:
+  #    label: Root cause (maintainers)
+  #    options:
+  #      - ""
+  #      - User setup / environment
+  #      - Configuration / YAML
+  #      - Documentation gap
+  #      - Code defect
+  #      - Infrastructure/HPC
+  #      - External dependency
+  #      - Expected behavior / not a bug
+  #      - Other
+  #  validations:
+  #    required: false
 
-  - type: checkboxes
-    id: docs_debt
-    attributes:
-      label: Documentation follow-up (maintainers)
-      options:
-        - label: Docs update needed
-        - label: FAQ candidate (recurring question)
+  #- type: checkboxes
+  #  id: docs_debt
+  #  attributes:
+  #    label: Documentation follow-up (maintainers)
+  #    options:
+  #      - label: Docs update needed
+  #      - label: FAQ candidate (recurring question)
 
-  - type: textarea
-    id: resolution
-    attributes:
-      label: Resolution summary (maintainers)
-      description: What fixed it? Include links to PRs, commits, or guidance.
-      placeholder: "Root cause + fix/workaround + references"
-    validations:
-      required: false
+  #- type: textarea
+  #  id: resolution
+  #  attributes:
+  #    label: Resolution summary (maintainers)
+  #    description: What fixed it? Include links to PRs, commits, or guidance.
+  #    placeholder: "Root cause + fix/workaround + references"
+  #  validations:
+  #    required: false
