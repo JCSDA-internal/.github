@@ -72,19 +72,19 @@ body:
     validations:
       required: true
 
-  - type: checkboxes
+  - type: dropdown
     id: platform
     attributes:
       label: Platform / system (select all that apply)
       options:
         # - label: Hera
-        - label: Orion / Hercules
-        - label: Discover
+        - Orion / Hercules
+        - Discover
         # - label: Gaea
-        - label: AWS / Cloud
-        - label: Local workstation
+        - AWS / Cloud
+        - Local workstation
         # - label: Container / Singularity / Docker
-        - label: Other (specify below)
+        - Other (specify below)
     validations:
       required: true
 
