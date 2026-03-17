@@ -20,7 +20,7 @@ body:
       required: true
 
   - type: textarea
-    id: requesting org
+    id: requesting_org
     attributes:
       label: Requesting Organization
       description: Specify the organization and, if applicable, the specific division, branch, or office requesting assistance.
@@ -85,12 +85,14 @@ body:
         - label: Local workstation
         # - label: Container / Singularity / Docker
         - label: Other (specify below)
+    validations:
+      required: true
 
   - type: textarea
     id: environment
     attributes:
       label: Environment details
-      description: Provide enough info to reproduce or reason about your setup.
+      description: Provide enough info to reproduce, or about your setup.
       placeholder: |
         System:
         OS (if known):
@@ -102,7 +104,7 @@ body:
         Repo(s) + branch/hash/tag:
         How installed (bundle/spack/conda/manual):
     validations:
-      required: false
+      required: true
 
   - type: textarea
     id: goal
@@ -138,7 +140,7 @@ body:
   #    render: shell
   #    placeholder: "Paste logs here…"
     validations:
-      required: false
+      required: true
 
   # - type: textarea
   #  id: expected
@@ -161,14 +163,15 @@ body:
     id: links
     attributes:
       label: Observed behavior / Links / configs / artifacts
-      description: Add links to configs, logs, minimal reproducer repo, or paste the error output or relevant log excerpt, etc. 
+      description: Add links to configs, logs, minimal reproducer repo, or paste the error output or relevant log excerpt, etc. OR write "Not applicable" 
       placeholder: |
         - YAML/config:
         - Log file:
         - Related issue/PR:
         - Dataset/sample:
+        - Not applicable
     validations:
-      required: false
+      required: true
 
   #- type: dropdown
   #  id: estimate
