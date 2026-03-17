@@ -19,6 +19,15 @@ body:
     validations:
       required: true
 
+  - type: textarea
+    id: requesting org
+    attributes:
+      label: Requesting Organization
+      description: Specify the organization and, if applicable, the specific division, branch, or office requesting assistance.
+      placeholder: "e.g., University, NOAA/NWS/EMC, NRL Monterey, NASA/GMAO"
+    validations:
+      required: true
+
   - type: dropdown
     id: category
     attributes:
@@ -30,7 +39,7 @@ body:
         # - Configuration question
         # - Scientific / methodology question
         - Performance / scaling
-        - Upgrade 
+        - New feature / upgrade
         # / compatibility
         - Documentation clarification
         # - Access / permissions
@@ -69,7 +78,7 @@ body:
       label: Platform / system (select all that apply)
       options:
         # - label: Hera
-        - label: Orion
+        - label: Orion / Hercules
         - label: Discover
         # - label: Gaea
         - label: AWS / Cloud
