@@ -8,8 +8,7 @@ body:
     attributes:
       value: |
         **Use this form for support requests.**
-        # If this is a confirmed software defect with a clear reproducer, consider using the **Bug Report** template instead.
-
+        
   - type: textarea
     id: summary
     attributes:
