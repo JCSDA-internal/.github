@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Parse issue form fields and apply labels
-      - uses: actions/github-script@v7
+        uses: actions/github-script@v7
         with:
           script: |
             const owner = context.repo.owner;
