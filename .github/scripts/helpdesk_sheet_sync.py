@@ -58,7 +58,8 @@ COLUMNS = [
     "labels",             # P
     "triage_category",    # Q
     "root_cause",         # R
-    "notes",              # S  ← manually maintained; never overwritten by automation
+    "story_points",       # S  parsed from a "points:N" label
+    "notes",              # T  ← manually maintained; never overwritten by automation
 ]
 
 GOOGLE_SCOPES = [
@@ -171,6 +172,57 @@ def find_issue_row(ws: gspread.Worksheet, repo: str, issue_number: int) -> int |
     return None
 
 
+# ── GitHub Projects helpers ───────────────────────────────────────────────────
+
+def get_estimate_from_project(owner: str, repo: str, issue_number: int, token: str) -> str:
+    """Return the Estimate field value (as a string) from GitHub Projects v2, or ''."""
+    query = """
+    query($owner: String!, $repo: String!, $number: Int!) {
+      repository(owner: $owner, name: $repo) {
+        issue(number: $number) {
+          projectItems(first: 10) {
+            nodes {
+              fieldValues(first: 20) {
+                nodes {
+                  ... on ProjectV2ItemFieldNumberValue {
+                    number
+                    field { ... on ProjectV2FieldCommon { name } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+    resp = requests.post(
+        "https://api.github.com/graphql",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+        },
+        json={"query": query, "variables": {"owner": owner, "repo": repo, "number": issue_number}},
+        timeout=30,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+
+    items = (data.get("data", {})
+                 .get("repository", {})
+                 .get("issue", {})
+                 .get("projectItems", {})
+                 .get("nodes", []))
+
+    for item in items:
+        for fv in item.get("fieldValues", {}).get("nodes", []):
+            if (fv.get("field", {}).get("name", "").lower() == "estimate"
+                    and fv.get("number") is not None):
+                val = fv["number"]
+                return str(int(val)) if val == int(val) else str(val)
+    return ""
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -216,6 +268,7 @@ def main() -> None:
     root_cause = next(
         (lb.split(":", 1)[1] for lb in label_names if lb.startswith("root:")), ""
     )
+    story_points = get_estimate_from_project(repo_owner, repo_name, issue_number, token)
 
     # ── Auto-assign whenever the issue has no assignee yet ───────────────────
     # Not limited to "opened" because the labeled event often fires first and
@@ -272,6 +325,7 @@ def main() -> None:
         ", ".join(label_names),
         triage_category,
         root_cause,
+        story_points,
         existing_notes,         # preserved — never clobbered by automation
     ]
 
