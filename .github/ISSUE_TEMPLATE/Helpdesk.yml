@@ -161,7 +161,7 @@ body:
   - type: textarea
     id: links
     attributes:
-      label: Observed behavior / Links / configs / artifacts
+      label: Links / Configs / Artifacts
       description: Add links to configs, logs, minimal reproducer repo, or paste the error output or relevant log excerpt, etc. OR write "Not applicable" 
       placeholder: |
         - YAML/config:
@@ -203,8 +203,18 @@ body:
     attributes:
       value: |
         ---
+        # Closure Notes *(Maintainer's fill in before or upon closing)*
+        These fields will be updated by our support team.
+
+  - type: textarea
+    id: maintainer_closure_notes
+    attributes:
+      label: "_______________________________________________________"
+      description: "Support team: add any general closure notes here, then complete the fields below before or immediately after closing this ticket."
+      value: |
         ## Maintainer Closure Notes *(fill in before or upon closing)*
-        **Support team:** complete the fields below before or immediately after closing this ticket.
+    validations:
+      required: false
 
   - type: dropdown
     id: maintainer_category
@@ -212,7 +222,6 @@ body:
       label: Triage Category / Maintainer Classification
       description: "Maintainers: classify the ticket type."
       options:
-        - ""
         - Helpdesk (question/guidance)
         - Bug (defect)
         - Feature (enhancement)
@@ -228,7 +237,6 @@ body:
       label: Root Cause
       description: "Maintainers: select the root cause category."
       options:
-        - ""
         - User setup / environment
         - Configuration / YAML
         - Documentation gap
