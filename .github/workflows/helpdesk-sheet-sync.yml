@@ -1,5 +1,10 @@
 name: Helpdesk → Google Sheet sync
 
+# ── Configuration ────────────────────────────────────────────────────────────
+env:
+  HELPDESK_SHEET_ID: ""   # paste the Sheet ID from the Google Sheets URL here
+# ─────────────────────────────────────────────────────────────────────────────
+
 # Fires on every issue lifecycle event; the job guard checks for the helpdesk label.
 on:
   issues:
@@ -37,9 +42,7 @@ jobs:
 
           # Google Sheets credentials (stored as repo/org secrets)
           # GOOGLE_SERVICE_ACCOUNT_JSON : full contents of the service account key JSON file
-          # HELPDESK_SHEET_ID           : the long ID from the Google Sheet URL
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          HELPDESK_SHEET_ID: ${{ secrets.HELPDESK_SHEET_ID }}
 
           # Issue context — passing as JSON is the safest way to handle
           # arbitrary text (backticks, $, newlines, etc.) in the issue body.
