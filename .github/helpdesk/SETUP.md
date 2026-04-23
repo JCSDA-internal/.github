@@ -39,14 +39,22 @@ etc.) a GitHub Actions workflow syncs issue data to a shared Google Sheet.
 
 ---
 
-## Step 3 — Add GitHub Secrets (~5 min)
+## Step 3 — Configure the Sheet ID and add the GitHub Secret
 
-Go to `github.com/JCSDA-internal/.github/settings/secrets/actions` and add two secrets:
+**Sheet ID** — open `.github/workflows/helpdesk-sheet-sync.yml` and paste your
+Sheet ID into the `HELPDESK_SHEET_ID` variable at the top of the file:
+
+```yaml
+env:
+  HELPDESK_SHEET_ID: "YOUR_SHEET_ID_HERE"
+```
+
+**Secret** — go to `github.com/JCSDA-internal/.github/settings/secrets/actions`
+and add one secret:
 
 | Name | Value |
 |---|---|
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Paste the **entire contents** of the downloaded `.json` key file |
-| `HELPDESK_SHEET_ID` | Paste just the Sheet ID string from Step 2 |
 
 ---
 
