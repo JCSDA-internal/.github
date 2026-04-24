@@ -261,7 +261,7 @@ body:
     attributes:
       label: Resolution Description
       description: "Maintainers: summarize what fixed or addressed the issue. Include links to PRs, commits, docs, or guidance given."
-      placeholder: |
+      value: |
         Maintainers: summarize what fixed or addressed the issue.
         Include links to PRs, commits, docs, or guidance given.
         Example: Root cause + fix/workaround + references
