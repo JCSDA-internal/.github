@@ -261,6 +261,10 @@ body:
     attributes:
       label: Resolution Description
       description: "Maintainers: summarize what fixed or addressed the issue. Include links to PRs, commits, docs, or guidance given."
-      placeholder: "Root cause + fix/workaround + references (e.g., PR #123, pointed to docs at X, user environment issue resolved by Y)"
+      placeholder: |
+        Maintainers: summarize what fixed or addressed the issue.
+        Include links to PRs, commits, docs, or guidance given.
+        Example: Root cause + fix/workaround + references
+          (e.g., PR #123, pointed to docs at X, user environment issue resolved by Y)
     validations:
       required: false
