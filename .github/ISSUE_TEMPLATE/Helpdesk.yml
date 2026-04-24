@@ -216,35 +216,35 @@ body:
     validations:
       required: false
 
-  - type: dropdown
+  - type: textarea
     id: maintainer_category
     attributes:
       label: Triage Category / Maintainer Classification
       description: "Maintainers: classify the ticket type."
-      options:
-        - Helpdesk (question/guidance)
-        - Bug (defect)
-        - Feature (enhancement)
-        - Research (methodology/design)
-        - Docs (documentation)
-        - Tracking (coordination)
+      value: |
+        - [ ] Helpdesk (question/guidance)
+        - [ ] Bug (defect)
+        - [ ] Feature (enhancement)
+        - [ ] Research (methodology/design)
+        - [ ] Docs (documentation)
+        - [ ] Tracking (coordination)
     validations:
       required: false
 
-  - type: dropdown
+  - type: textarea
     id: root_cause
     attributes:
       label: Root Cause
       description: "Maintainers: select the root cause category."
-      options:
-        - User setup / environment
-        - Configuration / YAML
-        - Documentation gap
-        - Code defect
-        - Infrastructure / HPC
-        - External dependency
-        - Expected behavior / not a bug
-        - Other
+      value: |
+        - [ ] User setup / environment
+        - [ ] Configuration / YAML
+        - [ ] Documentation gap
+        - [ ] Code defect
+        - [ ] Infrastructure / HPC
+        - [ ] External dependency
+        - [ ] Expected behavior / not a bug
+        - [ ] Other
     validations:
       required: false
 
