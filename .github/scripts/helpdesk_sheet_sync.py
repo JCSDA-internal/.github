@@ -55,11 +55,12 @@ COLUMNS = [
     "status",             # M
     "closed_at",          # N
     "time_to_close_days", # O
-    "labels",             # P
-    "triage_category",    # Q
-    "root_cause",         # R
-    "story_points",       # S  parsed from a "points:N" label
-    "notes",              # T  ← manually maintained; never overwritten by automation
+    "story_points",            # P  parsed from GitHub Projects v2 Estimate field
+    "labels",                  # Q
+    "triage_category",         # R
+    "root_cause",              # S
+    "resolution_description",  # T
+    "notes",                   # U  ← manually maintained; never overwritten by automation
 ]
 
 GOOGLE_SCOPES = [
@@ -81,6 +82,21 @@ def extract_field(body: str, section_title: str) -> str:
     pattern = rf'^###\s+{re.escape(section_title)}\s*\n+([^\n]+)'
     m = re.search(pattern, body or "", re.MULTILINE)
     return m.group(1).strip() if m else ""
+
+
+def extract_checked_items(body: str, section_title: str) -> str:
+    """
+    Return a comma-separated string of checked checkbox labels under a section.
+
+    Matches lines of the form '- [x] Label' (case-insensitive) that appear
+    after '### Section Title' and before the next '###' header or end of body.
+    """
+    pattern = rf'^###\s+{re.escape(section_title)}\s*\n(.*?)(?=^###|\Z)'
+    m = re.search(pattern, body or "", re.MULTILINE | re.DOTALL)
+    if not m:
+        return ""
+    checked = re.findall(r'^\s*-\s*\[x\]\s*(.+)', m.group(1), re.MULTILINE | re.IGNORECASE)
+    return ", ".join(item.strip() for item in checked)
 
 
 # ── Org → assignee lookup ─────────────────────────────────────────────────────
@@ -261,13 +277,10 @@ def main() -> None:
     reproducibility = extract_field(issue_body, "Reproducibility")
     platform        = extract_field(issue_body, "Platform / system (select all that apply)")
 
-    # Extract label-derived fields
-    triage_category = next(
-        (lb.split(":", 1)[1] for lb in label_names if lb.startswith("triage:")), ""
-    )
-    root_cause = next(
-        (lb.split(":", 1)[1] for lb in label_names if lb.startswith("root:")), ""
-    )
+    # Extract checkbox fields from the maintainer closure section of the issue body
+    triage_category      = extract_checked_items(issue_body, "Triage Category / Maintainer Classification")
+    root_cause           = extract_checked_items(issue_body, "Root Cause")
+    resolution_description = extract_field(issue_body, "Resolution Description")
     story_points = get_estimate_from_project(repo_owner, repo_name, issue_number, token)
 
     # ── Auto-assign whenever the issue has no assignee yet ───────────────────
@@ -322,10 +335,11 @@ def main() -> None:
         status,
         issue_closed_at,
         time_to_close,
+        story_points,
         ", ".join(label_names),
         triage_category,
         root_cause,
-        story_points,
+        resolution_description,
         existing_notes,         # preserved — never clobbered by automation
     ]
 
