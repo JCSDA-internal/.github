@@ -2,7 +2,7 @@ name: Helpdesk → Google Sheet sync
 
 # ── Configuration ────────────────────────────────────────────────────────────
 env:
-  HELPDESK_SHEET_ID: ""   # paste the Sheet ID from the Google Sheets URL here
+  HELPDESK_SHEET_ID: "1ij5LQwjtjfsdywVfX5YepqeHIs-tufIMW9k8pc_69nc"   # paste the Sheet ID from the Google Sheets URL here
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Fires on every issue lifecycle event; the job guard checks for the helpdesk label.
