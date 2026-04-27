@@ -160,7 +160,7 @@ body:
   - type: textarea
     id: links
     attributes:
-      label: Observed behavior / Links / configs / artifacts
+      label: Links / Configs / Artifacts
       description: Add links to configs, logs, minimal reproducer repo, or paste the error output or relevant log excerpt, etc. OR write "Not applicable" 
       placeholder: |
         - YAML/config:
@@ -198,45 +198,54 @@ body:
   #  validations:
   #    required: false
 
-  # - type: markdown
-  #  attributes:
-  #    value: |
-  #      ---
-  #      ## Maintainers (fill in after triage)
-  #      The fields below support reporting (time-to-resolution, root cause, documentation debt).  
-  #      You can leave them blank when opening the issue.
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        # Closure Notes *(Maintainer's fill in before or upon closing)*
+        These fields will be updated by our support team.
 
-  #- type: dropdown
-  #  id: maintainer_category
-  #  attributes:
-  #    label: Maintainer classification
-  #    options:
-  #      - ""
-  #      - Helpdesk (question/guidance)
-  #      - Bug (defect)
-  #      - Feature (enhancement)
-  #      - Research (methodology/design)
-  #      - Docs (documentation)
-  #      - Tracking (coordination)
-  #  validations:
-  #    required: false
+  - type: textarea
+    id: maintainer_closure_notes
+    attributes:
+      label: "_______________________________________________________"
+      description: "Support team: add any general closure notes here, then complete the fields below before or immediately after closing this ticket."
+      value: |
+        ## Maintainer Closure Notes *(fill in before or upon closing)*
+    validations:
+      required: false
 
-  #- type: dropdown
-  #  id: root_cause
-  #  attributes:
-  #    label: Root cause (maintainers)
-  #    options:
-  #      - ""
-  #      - User setup / environment
-  #      - Configuration / YAML
-  #      - Documentation gap
-  #      - Code defect
-  #      - Infrastructure/HPC
-  #      - External dependency
-  #      - Expected behavior / not a bug
-  #      - Other
-  #  validations:
-  #    required: false
+  - type: textarea
+    id: maintainer_category
+    attributes:
+      label: Triage Category / Maintainer Classification
+      description: "Maintainers: classify the ticket type."
+      value: |
+        - [ ] Helpdesk (question/guidance)
+        - [ ] Bug (defect)
+        - [ ] Feature (enhancement)
+        - [ ] Research (methodology/design)
+        - [ ] Docs (documentation)
+        - [ ] Tracking (coordination)
+    validations:
+      required: false
+
+  - type: textarea
+    id: root_cause
+    attributes:
+      label: Root Cause
+      description: "Maintainers: select the root cause category."
+      value: |
+        - [ ] User setup / environment
+        - [ ] Configuration / YAML
+        - [ ] Documentation gap
+        - [ ] Code defect
+        - [ ] Infrastructure / HPC
+        - [ ] External dependency
+        - [ ] Expected behavior / not a bug
+        - [ ] Other
+    validations:
+      required: false
 
   #- type: checkboxes
   #  id: docs_debt
@@ -246,11 +255,15 @@ body:
   #      - label: Docs update needed
   #      - label: FAQ candidate (recurring question)
 
-  #- type: textarea
-  #  id: resolution
-  #  attributes:
-  #    label: Resolution summary (maintainers)
-  #    description: What fixed it? Include links to PRs, commits, or guidance.
-  #    placeholder: "Root cause + fix/workaround + references"
-  #  validations:
-  #    required: false
+  - type: textarea
+    id: resolution
+    attributes:
+      label: Resolution Description
+      description: "Maintainers: summarize what fixed or addressed the issue. Include links to PRs, commits, docs, or guidance given."
+      value: |
+        Maintainers: summarize what fixed or addressed the issue.
+        Include links to PRs, commits, docs, or guidance given.
+        Example: Root cause + fix/workaround + references
+          (e.g., PR #123, pointed to docs at X, user environment issue resolved by Y)
+    validations:
+      required: false
