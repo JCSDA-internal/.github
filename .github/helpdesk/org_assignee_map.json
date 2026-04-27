@@ -1,0 +1,12 @@
+{
+  "_readme": "Map partner organization names to their JCSDA GitHub liaison username. Keys are matched case-insensitively as substrings against the free-text 'Requesting Organization' field. Replace PLACEHOLDER values with real GitHub usernames before deploying.",
+
+  "NOAA/NWS/EMC":   "gibbsp",
+  "NOAA/GFDL":      "gibbsp",
+  "NRL Monterey":   "gibbsp",
+  "NASA/GMAO":      "gibbsp",
+  "AFWA":           "gibbsp",
+  "Navy":           "gibbsp",
+  "Air Force":      "gibbsp",
+  "University":     "gibbsp"
+}

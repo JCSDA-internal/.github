@@ -1,0 +1,54 @@
+name: Helpdesk → Google Sheet sync
+
+# ── Configuration ────────────────────────────────────────────────────────────
+env:
+  HELPDESK_SHEET_ID: "1ij5LQwjtjfsdywVfX5YepqeHIs-tufIMW9k8pc_69nc"   # paste the Sheet ID from the Google Sheets URL here
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Fires on every issue lifecycle event; the job guard checks for the helpdesk label.
+on:
+  issues:
+    types: [opened, edited, closed, reopened, assigned, labeled, unlabeled]
+
+permissions:
+  issues: write    # needed to auto-assign the issue on open
+  contents: read   # needed for actions/checkout to read org_assignee_map.json
+  repository-projects: read   # needed to read the Estimate field from GitHub Projects
+
+# One sync per issue at a time; later events win (safe because we always overwrite the row).
+concurrency:
+  group: helpdesk-sheet-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: contains(github.event.issue.labels.*.name, 'helpdesk')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install "gspread<6" google-auth requests
+
+      - name: Sync issue to Google Sheet
+        env:
+          # GitHub auth — used to auto-assign the issue on open
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # Google Sheets credentials (stored as repo/org secrets)
+          # GOOGLE_SERVICE_ACCOUNT_JSON : full contents of the service account key JSON file
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+
+          # Issue context — passing as JSON is the safest way to handle
+          # arbitrary text (backticks, $, newlines, etc.) in the issue body.
+          ISSUE_JSON: ${{ toJSON(github.event.issue) }}
+          EVENT_ACTION: ${{ github.event.action }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+
+        run: python .github/scripts/helpdesk_sheet_sync.py
