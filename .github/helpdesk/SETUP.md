@@ -132,6 +132,34 @@ to verify auto-assignment.
 
 ---
 
+## Sheet columns reference
+
+| Col | Name | Source |
+|-----|------|--------|
+| A | `issue_number` | Issue number |
+| B | `repo` | `owner/repo` — composite key with A |
+| C | `title` | Issue title |
+| D | `url` | `=HYPERLINK()` formula — renders as clickable `#N` |
+| E | `opened_by` | Issue author login |
+| F | `opened_at` | ISO timestamp |
+| G | `requesting_org` | Form field: *Requesting Organization* |
+| H | `category` | Form field: *Issue category* |
+| I | `impact` | Form field: *Impact / priority* |
+| J | `reproducibility` | Form field: *Reproducibility* |
+| K | `platform` | Form field: *Platform / system* |
+| L | `assignees` | Comma-separated assignee logins |
+| M | `status` | `Open` or `Closed` |
+| N | `closed_at` | ISO timestamp, blank if open |
+| O | `time_to_close_days` | Decimal days from open to close, blank if open |
+| P | `story_points` | Estimate field from GitHub Projects v2 |
+| Q | `labels` | Comma-separated label names |
+| R | `triage_category` | Checked items under *Triage Category / Maintainer Classification* |
+| S | `root_cause` | Checked items under *Root Cause* |
+| T | `resolution_description` | Form field: *Resolution Description* |
+| U | `notes` | **Manually maintained — never overwritten by automation** |
+
+---
+
 ## Credential security notes
 
 - The service account has no GCP project roles — its only access is the single
