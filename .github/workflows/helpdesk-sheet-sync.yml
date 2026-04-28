@@ -33,7 +33,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install "gspread<6" google-auth requests
+        run: pip install "gspread<6" google-auth requests pyyaml
 
       - name: Sync issue to Google Sheet
         env:

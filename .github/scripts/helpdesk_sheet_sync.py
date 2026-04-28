@@ -29,6 +29,8 @@ import os
 import re
 import datetime
 
+import yaml
+
 import gspread
 import requests
 
@@ -118,6 +120,21 @@ def extract_checked_items(body: str, section_title: str) -> str:
         return ""
     checked = re.findall(r'^\s*-\s*\[x\]\s*(.+)', m.group(1), re.MULTILINE | re.IGNORECASE)
     return ", ".join(item.strip() for item in checked)
+
+
+# ── Issue template helpers ────────────────────────────────────────────────────
+
+def load_field_placeholder(template_path: str, field_id: str) -> str:
+    """
+    Return the stripped default `value` for a textarea field in a GitHub issue
+    form YAML template, identified by its `id`.  Returns '' if not found.
+    """
+    with open(template_path) as f:
+        template = yaml.safe_load(f)
+    for field in template.get("body", []):
+        if field.get("id") == field_id:
+            return field.get("attributes", {}).get("value", "").strip()
+    return ""
 
 
 # ── Org → assignee lookup ─────────────────────────────────────────────────────
@@ -397,8 +414,9 @@ def main() -> None:
     repo             = f"{repo_owner}/{repo_name}"
 
     # Load org → assignee map
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    map_path   = os.path.join(script_dir, "..", "helpdesk", "org_assignee_map.json")
+    script_dir    = os.path.dirname(os.path.abspath(__file__))
+    map_path      = os.path.join(script_dir, "..", "helpdesk", "org_assignee_map.json")
+    template_path = os.path.join(script_dir, "..", "ISSUE_TEMPLATE", "Helpdesk.yml")
     with open(map_path) as f:
         org_map = json.load(f)
 
@@ -413,7 +431,8 @@ def main() -> None:
     triage_category      = extract_checked_items(issue_body, "Triage Category / Maintainer Classification")
     root_cause           = extract_checked_items(issue_body, "Root Cause")
     resolution_description = extract_section(issue_body, "Resolution Description")
-    if resolution_description.startswith("Maintainers: summarize what fixed"):
+    resolution_placeholder = load_field_placeholder(template_path, "resolution")
+    if resolution_placeholder and resolution_description.strip() == resolution_placeholder:
         resolution_description = ""
     story_points = get_estimate_from_project(repo_owner, repo_name, issue_number, token)
 
