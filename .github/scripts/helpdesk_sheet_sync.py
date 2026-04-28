@@ -31,7 +31,6 @@ import datetime
 
 import gspread
 import requests
-from google.oauth2.service_account import Credentials
 
 # ── Sheet config ──────────────────────────────────────────────────────────────
 
@@ -84,6 +83,16 @@ def extract_field(body: str, section_title: str) -> str:
     return m.group(1).strip() if m else ""
 
 
+def extract_section(body: str, section_title: str) -> str:
+    """
+    Return all text under a GitHub issue form section header, up to the next
+    '###' header or end of body, with leading/trailing whitespace stripped.
+    """
+    pattern = rf'^###\s+{re.escape(section_title)}\s*\n(.*?)(?=^###|\Z)'
+    m = re.search(pattern, body or "", re.MULTILINE | re.DOTALL)
+    return m.group(1).strip() if m else ""
+
+
 def extract_checked_items(body: str, section_title: str) -> str:
     """
     Return a comma-separated string of checked checkbox labels under a section.
@@ -101,16 +110,25 @@ def extract_checked_items(body: str, section_title: str) -> str:
 
 # ── Org → assignee lookup ─────────────────────────────────────────────────────
 
+_PLACEHOLDER_ORGS = {"na", "n/a", "none", "unknown", "n.a.", "not applicable", ""}
+
 def match_org(requesting_org: str, org_map: dict) -> str | None:
     """
     Case-insensitive substring match: org_map key appears in requesting_org,
-    or requesting_org appears in the key.  Returns the GitHub username or None.
+    or requesting_org appears in the key.  Falls back to org_map['default_assignee']
+    when no specific match is found (including placeholder/unknown org values).
+    Returns the GitHub username or None.
     """
-    org_lower = requesting_org.lower()
+    default = org_map.get("default_assignee")
+    org_lower = requesting_org.lower().strip()
+    if org_lower in _PLACEHOLDER_ORGS:
+        return default
     for key, assignee in org_map.items():
+        if key.startswith("_") or key == "default_assignee":
+            continue
         if key.lower() in org_lower or org_lower in key.lower():
             return assignee
-    return None
+    return default
 
 
 # ── GitHub API helpers ────────────────────────────────────────────────────────
@@ -280,7 +298,9 @@ def main() -> None:
     # Extract checkbox fields from the maintainer closure section of the issue body
     triage_category      = extract_checked_items(issue_body, "Triage Category / Maintainer Classification")
     root_cause           = extract_checked_items(issue_body, "Root Cause")
-    resolution_description = extract_field(issue_body, "Resolution Description")
+    resolution_description = extract_section(issue_body, "Resolution Description")
+    if resolution_description.startswith("Maintainers: summarize what fixed"):
+        resolution_description = ""
     story_points = get_estimate_from_project(repo_owner, repo_name, issue_number, token)
 
     # ── Auto-assign whenever the issue has no assignee yet ───────────────────
@@ -344,14 +364,19 @@ def main() -> None:
     ]
 
     # ── Write to sheet ────────────────────────────────────────────────────────
+    no_bold = {"textFormat": {"bold": False}}
     if row_idx:
         range_notation = f"A{row_idx}:{END_COL}{row_idx}"
         # USER_ENTERED is required so the =HYPERLINK() formula is evaluated.
         ws.update(range_notation, [row], value_input_option="USER_ENTERED")
+        ws.format(range_notation, no_bold)
         print(f"Updated row {row_idx} for issue #{issue_number} in {repo} "
               f"(event: {event_action}, status: {status})")
     else:
         ws.append_row(row, value_input_option="USER_ENTERED")
+        new_row_idx = find_issue_row(ws, repo, issue_number)
+        if new_row_idx:
+            ws.format(f"A{new_row_idx}:{END_COL}{new_row_idx}", no_bold)
         print(f"Appended new row for issue #{issue_number} in {repo} "
               f"(event: {event_action})")
 
