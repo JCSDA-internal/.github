@@ -121,8 +121,11 @@ to verify auto-assignment.
 - Labels `helpdesk` and any `triage:*` labels should be applied
 
 **Google Sheet:**
-- Row 1 should be a frozen header row (auto-created on first run)
-- Row 2 should have all issue fields populated
+- Row 1 should be a frozen, locked section-header row (auto-created on first run),
+  with four merged, labelled bands: **Ticket Information** | **Requester Information** |
+  **Work Tracking** | **Maintainer Notes**
+- Row 2 should be a frozen, locked column-header row
+- Row 3 should have all issue fields populated
 - Column D (`url`) should display `#N` as a clickable hyperlink
 
 **Close the test issue** and re-check the sheet:
@@ -134,25 +137,45 @@ to verify auto-assignment.
 
 ## Sheet columns reference
 
+Row 1 carries merged section banners (locked). Row 2 carries the column headers
+(locked). Data begins at row 3.
+
+### Ticket Information (A–E)
+
 | Col | Name | Source |
 |-----|------|--------|
-| A | `issue_number` | Issue number |
+| A | `issue_number` | Issue number — composite key with B |
 | B | `repo` | `owner/repo` — composite key with A |
 | C | `title` | Issue title |
 | D | `url` | `=HYPERLINK()` formula — renders as clickable `#N` |
-| E | `opened_by` | Issue author login |
-| F | `opened_at` | ISO timestamp |
-| G | `requesting_org` | Form field: *Requesting Organization* |
-| H | `category` | Form field: *Issue category* |
-| I | `impact` | Form field: *Impact / priority* |
-| J | `reproducibility` | Form field: *Reproducibility* |
-| K | `platform` | Form field: *Platform / system* |
-| L | `assignees` | Comma-separated assignee logins |
-| M | `status` | `Open` or `Closed` |
-| N | `closed_at` | ISO timestamp, blank if open |
-| O | `time_to_close_days` | Decimal days from open to close, blank if open |
-| P | `story_points` | Estimate field from GitHub Projects v2 |
-| Q | `labels` | Comma-separated label names |
+| E | `labels` | Comma-separated label names |
+
+### Requester Information (F–L)
+
+| Col | Name | Source |
+|-----|------|--------|
+| F | `opened_by` | Issue author login |
+| G | `opened_at` | ISO timestamp |
+| H | `requesting_org` | Form field: *Requesting Organization* |
+| I | `category` | Form field: *Issue category* |
+| J | `impact` | Form field: *Impact / priority* |
+| K | `reproducibility` | Form field: *Reproducibility* |
+| L | `platform` | Form field: *Platform / system* |
+
+### Work Tracking (M–Q)
+
+| Col | Name | Source |
+|-----|------|--------|
+| M | `assignees` | Comma-separated assignee logins |
+| N | `status` | `Open` or `Closed` |
+| O | `closed_at` | ISO timestamp, blank if open |
+| P | `time_to_close_days` | Decimal days from open to close, blank if open |
+| Q | `story_points` | Estimate field from GitHub Projects v2 |
+
+### Maintainer Notes (R–U)
+
+| Col | Name | Source |
+|-----|------|--------|
 | R | `triage_category` | Checked items under *Triage Category / Maintainer Classification* |
 | S | `root_cause` | Checked items under *Root Cause* |
 | T | `resolution_description` | Form field: *Resolution Description* |
