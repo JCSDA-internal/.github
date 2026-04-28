@@ -434,8 +434,6 @@ def main() -> None:
     resolution_placeholder = load_field_placeholder(template_path, "resolution")
     if resolution_placeholder and resolution_description.strip() == resolution_placeholder:
         resolution_description = ""
-    story_points = get_estimate_from_project(repo_owner, repo_name, issue_number, token)
-
     # ── Auto-assign whenever the issue has no assignee yet ───────────────────
     # Not limited to "opened" because the labeled event often fires first and
     # cancels the opened run (GitHub applies template labels near-simultaneously).
@@ -458,15 +456,25 @@ def main() -> None:
     time_to_close  = (str(days_between(issue_created_at, issue_closed_at))
                       if issue_closed_at else "")
 
-    # ── Open the worksheet ────────────────────────────────────────────────────
-    ws = open_worksheet(sheet_id, creds_dict)
-
-    # ── Preserve manually-entered notes ──────────────────────────────────────
-    existing_notes = ""
+    # ── Open the worksheet and locate any existing row ────────────────────────
+    ws      = open_worksheet(sheet_id, creds_dict)
     row_idx = find_issue_row(ws, repo, issue_number)
+
+    # ── Preserve manually-maintained columns from the existing row ────────────
+    existing_notes = ""
     if row_idx:
         notes_col_idx = COLUMNS.index("notes") + 1  # 1-based
         existing_notes = ws.cell(row_idx, notes_col_idx).value or ""
+
+    # Only fetch story points on open/close; the Projects Estimate field doesn't
+    # change on label/assign/edit events and the GraphQL call costs quota.
+    if event_action in {"opened", "closed", "edited"}:
+        story_points = get_estimate_from_project(repo_owner, repo_name, issue_number, token)
+    elif row_idx:
+        sp_col_idx = COLUMNS.index("story_points") + 1  # 1-based
+        story_points = ws.cell(row_idx, sp_col_idx).value or ""
+    else:
+        story_points = ""
 
     # ── Build row (order matches COLUMNS exactly) ─────────────────────────────
     # The url cell uses a HYPERLINK formula so it renders as a clickable link.
