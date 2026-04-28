@@ -37,29 +37,41 @@ import requests
 SHEET_TAB = "Helpdesk Tickets"
 
 # Column order in the spreadsheet. Must stay in sync with the row list built
-# in build_row() below.
+# in main() below.
 COLUMNS = [
-    "issue_number",       # A  ┐ composite key —
-    "repo",               # B  ┘ both columns together uniquely identify a row
-    "title",              # C
-    "url",                # D  written as =HYPERLINK() for clickability
-    "opened_by",          # E
-    "opened_at",          # F
-    "requesting_org",     # G
-    "category",           # H
-    "impact",             # I
-    "reproducibility",    # J
-    "platform",           # K
-    "assignees",          # L
-    "status",             # M
-    "closed_at",          # N
-    "time_to_close_days", # O
-    "story_points",            # P  parsed from GitHub Projects v2 Estimate field
-    "labels",                  # Q
-    "triage_category",         # R
-    "root_cause",              # S
-    "resolution_description",  # T
-    "notes",                   # U  ← manually maintained; never overwritten by automation
+    # ── Ticket Information ────────────────────────────────────────────────────
+    "issue_number",           # A  ┐ composite key —
+    "repo",                   # B  ┘ both columns together uniquely identify a row
+    "title",                  # C
+    "url",                    # D  written as =HYPERLINK() for clickability
+    "labels",                 # E
+    # ── Requester Information ─────────────────────────────────────────────────
+    "opened_by",              # F
+    "opened_at",              # G
+    "requesting_org",         # H
+    "category",               # I
+    "impact",                 # J
+    "reproducibility",        # K
+    "platform",               # L
+    # ── Work Tracking ─────────────────────────────────────────────────────────
+    "assignees",              # M
+    "status",                 # N
+    "closed_at",              # O
+    "time_to_close_days",     # P
+    "story_points",           # Q  parsed from GitHub Projects v2 Estimate field
+    # ── Maintainer Notes ──────────────────────────────────────────────────────
+    "triage_category",        # R
+    "root_cause",             # S
+    "resolution_description", # T
+    "notes",                  # U  ← manually maintained; never overwritten by automation
+]
+
+# Row-1 section headers: (label, first_col_1based, last_col_1based inclusive)
+_SECTIONS = [
+    ("Ticket Information",     1,  5),  # A–E
+    ("Requester Information",  6, 12),  # F–L
+    ("Work Tracking",         13, 17),  # M–Q
+    ("Maintainer Notes",      18, 21),  # R–U
 ]
 
 GOOGLE_SCOPES = [
@@ -170,7 +182,106 @@ def col_letter(n: int) -> str:
     return result
 
 
-END_COL = col_letter(len(COLUMNS))   # e.g. "R" for 18 columns
+END_COL = col_letter(len(COLUMNS))   # "U" for 21 columns
+
+
+def _remove_bold(ws: "gspread.Worksheet", range_notation: str) -> None:
+    """Remove bold using a narrow fields mask so the HYPERLINK formula is preserved."""
+    body = {
+        "requests": [
+            {
+                "repeatCell": {
+                    "range": gspread.utils.a1_range_to_grid_range(range_notation, ws.id),
+                    "cell": {"userEnteredFormat": {"textFormat": {"bold": False}}},
+                    "fields": "userEnteredFormat.textFormat.bold",
+                }
+            }
+        ]
+    }
+    ws.spreadsheet.batch_update(body)
+
+
+def _setup_header_rows(ws: "gspread.Worksheet", sa_email: str = "") -> None:
+    """
+    Build the two locked header rows on a fresh (or just-inserted) sheet.
+
+    Row 1 — merged section banners: Ticket Information | Requester Information |
+             Work Tracking | Maintainer Notes
+    Row 2 — individual column names (COLUMNS list)
+
+    Both rows are frozen and protected; the service-account email (sa_email)
+    is added as an editor so automation can still reinitialise if needed.
+    """
+    sh = ws.spreadsheet
+    requests = []
+
+    # Merge row-1 cells within each section
+    for _, start_col, end_col in _SECTIONS:
+        requests.append({
+            "mergeCells": {
+                "range": {
+                    "sheetId": ws.id,
+                    "startRowIndex": 0, "endRowIndex": 1,
+                    "startColumnIndex": start_col - 1, "endColumnIndex": end_col,
+                },
+                "mergeType": "MERGE_ALL",
+            }
+        })
+
+    # Format row 1: bold, centred, light-blue background
+    requests.append({
+        "repeatCell": {
+            "range": {
+                "sheetId": ws.id,
+                "startRowIndex": 0, "endRowIndex": 1,
+                "startColumnIndex": 0, "endColumnIndex": len(COLUMNS),
+            },
+            "cell": {"userEnteredFormat": {
+                "textFormat": {"bold": True},
+                "horizontalAlignment": "CENTER",
+                "backgroundColor": {"red": 0.78, "green": 0.87, "blue": 0.95},
+            }},
+            "fields": "userEnteredFormat(textFormat.bold,horizontalAlignment,backgroundColor)",
+        }
+    })
+
+    # Format row 2: bold, light-grey background
+    requests.append({
+        "repeatCell": {
+            "range": {
+                "sheetId": ws.id,
+                "startRowIndex": 1, "endRowIndex": 2,
+                "startColumnIndex": 0, "endColumnIndex": len(COLUMNS),
+            },
+            "cell": {"userEnteredFormat": {
+                "textFormat": {"bold": True},
+                "backgroundColor": {"red": 0.9, "green": 0.9, "blue": 0.9},
+            }},
+            "fields": "userEnteredFormat(textFormat.bold,backgroundColor)",
+        }
+    })
+
+    # Lock rows 1–2; service account retains edit rights, everyone else sees a hard lock
+    editors_payload = {"users": [sa_email]} if sa_email else {}
+    requests.append({
+        "addProtectedRange": {
+            "protectedRange": {
+                "range": {"sheetId": ws.id, "startRowIndex": 0, "endRowIndex": 2},
+                "description": "Header rows — do not edit",
+                "warningOnly": False,
+                "editors": editors_payload,
+            }
+        }
+    })
+
+    sh.batch_update({"requests": requests})
+
+    # Write section labels after merging so they land in the first cell of each region
+    for label, start_col, _ in _SECTIONS:
+        ws.update_cell(1, start_col, label)
+    ws.update(f"A2:{END_COL}2", [COLUMNS])
+    ws.freeze(rows=2)
+    print("Created section and column header rows.")
 
 
 def open_worksheet(sheet_id: str, creds_dict: dict) -> gspread.Worksheet:
@@ -183,12 +294,15 @@ def open_worksheet(sheet_id: str, creds_dict: dict) -> gspread.Worksheet:
     except gspread.WorksheetNotFound:
         ws = sh.add_worksheet(title=SHEET_TAB, rows=2000, cols=len(COLUMNS))
 
-    # Create header row if the sheet is empty or was just created.
-    first_row = ws.row_values(1)
-    if not first_row or first_row[0] != "issue_number":
-        ws.insert_row(COLUMNS, index=1)
-        ws.freeze(rows=1)
-        print("Created header row.")
+    # Row 2 holds the column headers in the new two-row layout.
+    second_row = ws.row_values(2)
+    if not second_row or second_row[0] != "issue_number":
+        # Handle sheets that were initialised with the old single-header format:
+        # insert a blank row above so existing column headers shift to row 2.
+        first_row = ws.row_values(1)
+        if first_row and first_row[0] == "issue_number":
+            ws.insert_row([""] * len(COLUMNS), index=1)
+        _setup_header_rows(ws, creds_dict.get("client_email", ""))
 
     return ws
 
@@ -197,12 +311,12 @@ def find_issue_row(ws: gspread.Worksheet, repo: str, issue_number: int) -> int |
     """
     Return the 1-based row index matching (repo, issue_number), or None.
     Both columns are checked because the same issue number can appear in
-    multiple repositories.
+    multiple repositories.  Data starts at row 3 (rows 1–2 are headers).
     """
-    all_rows = ws.get_all_values()  # list of lists; row 0 is the header
-    for i, row in enumerate(all_rows):
+    all_rows = ws.get_all_values()
+    for i, row in enumerate(all_rows[2:], start=3):
         if len(row) >= 2 and row[0] == str(issue_number) and row[1] == repo:
-            return i + 1  # gspread rows are 1-indexed
+            return i
     return None
 
 
@@ -340,10 +454,13 @@ def main() -> None:
     url_cell = f'=HYPERLINK("{issue_url}", "#{issue_number}")'
 
     row = [
+        # Ticket Information (A–E)
         str(issue_number),
         repo,
         issue_title,
         url_cell,
+        ", ".join(label_names),
+        # Requester Information (F–L)
         issue_author,
         issue_created_at,
         requesting_org,
@@ -351,12 +468,13 @@ def main() -> None:
         impact,
         reproducibility,
         platform,
+        # Work Tracking (M–Q)
         ", ".join(assignees),
         status,
         issue_closed_at,
         time_to_close,
         story_points,
-        ", ".join(label_names),
+        # Maintainer Notes (R–U)
         triage_category,
         root_cause,
         resolution_description,
@@ -364,19 +482,18 @@ def main() -> None:
     ]
 
     # ── Write to sheet ────────────────────────────────────────────────────────
-    no_bold = {"textFormat": {"bold": False}}
     if row_idx:
         range_notation = f"A{row_idx}:{END_COL}{row_idx}"
         # USER_ENTERED is required so the =HYPERLINK() formula is evaluated.
         ws.update(range_notation, [row], value_input_option="USER_ENTERED")
-        ws.format(range_notation, no_bold)
+        _remove_bold(ws, range_notation)
         print(f"Updated row {row_idx} for issue #{issue_number} in {repo} "
               f"(event: {event_action}, status: {status})")
     else:
         ws.append_row(row, value_input_option="USER_ENTERED")
         new_row_idx = find_issue_row(ws, repo, issue_number)
         if new_row_idx:
-            ws.format(f"A{new_row_idx}:{END_COL}{new_row_idx}", no_bold)
+            _remove_bold(ws, f"A{new_row_idx}:{END_COL}{new_row_idx}")
         print(f"Appended new row for issue #{issue_number} in {repo} "
               f"(event: {event_action})")
 
