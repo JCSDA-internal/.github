@@ -324,13 +324,21 @@ def open_worksheet(sheet_id: str, creds_dict: dict) -> gspread.Worksheet:
     return ws
 
 
-def find_issue_row(ws: gspread.Worksheet, repo: str, issue_number: int) -> int | None:
+def find_issue_row(
+    ws: gspread.Worksheet,
+    repo: str,
+    issue_number: int,
+    all_rows: list[list[str]] | None = None,
+) -> int | None:
     """
     Return the 1-based row index matching (repo, issue_number), or None.
     Both columns are checked because the same issue number can appear in
     multiple repositories.  Data starts at row 3 (rows 1–2 are headers).
+
+    Pass a pre-fetched all_rows to avoid a redundant get_all_values() call.
     """
-    all_rows = ws.get_all_values()
+    if all_rows is None:
+        all_rows = ws.get_all_values()
     for i, row in enumerate(all_rows[2:], start=3):
         if len(row) >= 2 and row[0] == str(issue_number) and row[1] == repo:
             return i
@@ -458,12 +466,13 @@ def main() -> None:
                       if issue_closed_at else "")
 
     # ── Open the worksheet and locate any existing row ────────────────────────
-    ws      = open_worksheet(sheet_id, creds_dict)
-    row_idx = find_issue_row(ws, repo, issue_number)
+    ws       = open_worksheet(sheet_id, creds_dict)
+    all_rows = ws.get_all_values()
+    row_idx  = find_issue_row(ws, repo, issue_number, all_rows)
 
     # ── Preserve manually-maintained columns from the existing row ────────────
     existing_notes = ""
-    if row_idx:
+    if row_idx is not None:
         notes_col_idx = COLUMNS.index("notes") + 1  # 1-based
         existing_notes = ws.cell(row_idx, notes_col_idx).value or ""
 
@@ -471,7 +480,7 @@ def main() -> None:
     # change on label/assign/edit events and the GraphQL call costs quota.
     if event_action in {"opened", "closed", "edited"}:
         story_points = get_estimate_from_project(repo_owner, repo_name, issue_number, token)
-    elif row_idx:
+    elif row_idx is not None:
         sp_col_idx = COLUMNS.index("story_points") + 1  # 1-based
         story_points = ws.cell(row_idx, sp_col_idx).value or ""
     else:
@@ -510,7 +519,7 @@ def main() -> None:
     ]
 
     # ── Write to sheet ────────────────────────────────────────────────────────
-    if row_idx:
+    if row_idx is not None:
         range_notation = f"A{row_idx}:{END_COL}{row_idx}"
         # USER_ENTERED is required so the =HYPERLINK() formula is evaluated.
         ws.update(range_notation, [row], value_input_option="USER_ENTERED")
@@ -519,9 +528,8 @@ def main() -> None:
               f"(event: {event_action}, status: {status})")
     else:
         ws.append_row(row, value_input_option="USER_ENTERED")
-        new_row_idx = find_issue_row(ws, repo, issue_number)
-        if new_row_idx:
-            _remove_bold(ws, f"A{new_row_idx}:{END_COL}{new_row_idx}")
+        new_row_idx = len(all_rows) + 1  # append_row always adds after the last fetched row
+        _remove_bold(ws, f"A{new_row_idx}:{END_COL}{new_row_idx}")
         print(f"Appended new row for issue #{issue_number} in {repo} "
               f"(event: {event_action})")
 
