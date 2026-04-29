@@ -125,14 +125,19 @@ def extract_field(body: str, section_title: str) -> str:
     return m.group(1).strip() if m else ""
 
 
+def _section_body(body: str, section_title: str) -> str | None:
+    m = re.search(rf'^###\s+{re.escape(section_title)}\s*\n(.*?)(?=^###|\Z)',
+                  body or "", re.MULTILINE | re.DOTALL)
+    return m.group(1) if m else None
+
+
 def extract_section(body: str, section_title: str) -> str:
     """
     Return all text under a GitHub issue form section header, up to the next
     '###' header or end of body, with leading/trailing whitespace stripped.
     """
-    pattern = rf'^###\s+{re.escape(section_title)}\s*\n(.*?)(?=^###|\Z)'
-    m = re.search(pattern, body or "", re.MULTILINE | re.DOTALL)
-    return m.group(1).strip() if m else ""
+    text = _section_body(body, section_title)
+    return text.strip() if text is not None else ""
 
 
 def extract_checked_items(body: str, section_title: str) -> str:
@@ -142,11 +147,10 @@ def extract_checked_items(body: str, section_title: str) -> str:
     Matches lines of the form '- [x] Label' (case-insensitive) that appear
     after '### Section Title' and before the next '###' header or end of body.
     """
-    pattern = rf'^###\s+{re.escape(section_title)}\s*\n(.*?)(?=^###|\Z)'
-    m = re.search(pattern, body or "", re.MULTILINE | re.DOTALL)
-    if not m:
+    text = _section_body(body, section_title)
+    if text is None:
         return ""
-    checked = re.findall(r'^\s*-\s*\[x\]\s*(.+)', m.group(1), re.MULTILINE | re.IGNORECASE)
+    checked = re.findall(r'^\s*-\s*\[x\]\s*(.+)', text, re.MULTILINE | re.IGNORECASE)
     return ", ".join(item.strip() for item in checked)
 
 
@@ -211,8 +215,8 @@ def gh_assign(owner: str, repo: str, issue_number: int,
 # ── Date helpers ──────────────────────────────────────────────────────────────
 
 def days_between(a_iso: str, b_iso: str) -> float:
-    a = datetime.datetime.fromisoformat(a_iso.replace("Z", "+00:00"))
-    b = datetime.datetime.fromisoformat(b_iso.replace("Z", "+00:00"))
+    a = datetime.datetime.fromisoformat(a_iso)
+    b = datetime.datetime.fromisoformat(b_iso)
     return round((b - a).total_seconds() / 86400.0, 2)
 
 
