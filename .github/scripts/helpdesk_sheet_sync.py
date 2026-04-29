@@ -434,10 +434,11 @@ def main() -> None:
     resolution_placeholder = load_field_placeholder(template_path, "resolution")
     if resolution_placeholder and resolution_description.strip() == resolution_placeholder:
         resolution_description = ""
-    # ── Auto-assign whenever the issue has no assignee yet ───────────────────
-    # Not limited to "opened" because the labeled event often fires first and
-    # cancels the opened run (GitHub applies template labels near-simultaneously).
-    if not assignees:
+    # ── Auto-assign on open/label/assign events when no assignee is set ──────
+    # Includes "labeled" because GitHub applies template labels near-simultaneously
+    # with "opened", and the labeled event can fire first and cancel the opened run.
+    # Excluding other events (edit, reopen, etc.) prevents silently undoing manual unassignment.
+    if not assignees and event_action in {"opened", "labeled"}:
         liaison = match_org(requesting_org, org_map)
         if liaison:
             try:
