@@ -15,10 +15,11 @@ permissions:
   contents: read   # needed for actions/checkout to read org_assignee_map.json
   repository-projects: read   # needed to read the Estimate field from GitHub Projects
 
-# One sync per issue at a time; later events win (safe because we always overwrite the row).
+# One sync per issue at a time; cancel stale runs so only the latest event wins.
+# Safe because the script always overwrites the row with full current issue state.
 concurrency:
-  group: helpdesk-sheet-${{ github.event.issue.number }}
-  cancel-in-progress: false
+  group: helpdesk-sheet-${{ github.repository }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
 
 jobs:
   sync:

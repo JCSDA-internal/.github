@@ -27,12 +27,40 @@ Required env vars (all set by the workflow):
 import json
 import os
 import re
+import time
+import random
 import datetime
 
 import yaml
 
 import gspread
 import requests
+
+# ── Retry helpers ────────────────────────────────────────────────────────────
+
+_RETRY_ATTEMPTS = 5
+_RETRY_BASE     = 2.0   # seconds; doubles each attempt + jitter
+
+
+def _sheet_write_with_retry(fn, *args, **kwargs):
+    """
+    Call fn(*args, **kwargs) with exponential-backoff retry on gspread API errors.
+
+    Needed because multiple repos can push helpdesk events simultaneously to the
+    same Google Sheet, and the Sheets API returns 429 / 503 under write contention.
+    """
+    for attempt in range(_RETRY_ATTEMPTS):
+        try:
+            return fn(*args, **kwargs)
+        except gspread.exceptions.APIError as exc:
+            status = getattr(exc.response, "status_code", None)
+            if attempt == _RETRY_ATTEMPTS - 1 or status not in (429, 500, 503):
+                raise
+            delay = _RETRY_BASE * (2 ** attempt) + random.uniform(0, 1)
+            print(f"Sheet API error {status} on attempt {attempt + 1}; "
+                  f"retrying in {delay:.1f}s …")
+            time.sleep(delay)
+
 
 # ── Sheet config ──────────────────────────────────────────────────────────────
 
@@ -522,12 +550,14 @@ def main() -> None:
     if row_idx is not None:
         range_notation = f"A{row_idx}:{END_COL}{row_idx}"
         # USER_ENTERED is required so the =HYPERLINK() formula is evaluated.
-        ws.update(range_notation, [row], value_input_option="USER_ENTERED")
+        _sheet_write_with_retry(
+            ws.update, range_notation, [row], value_input_option="USER_ENTERED"
+        )
         _remove_bold(ws, range_notation)
         print(f"Updated row {row_idx} for issue #{issue_number} in {repo} "
               f"(event: {event_action}, status: {status})")
     else:
-        ws.append_row(row, value_input_option="USER_ENTERED")
+        _sheet_write_with_retry(ws.append_row, row, value_input_option="USER_ENTERED")
         new_row_idx = len(all_rows) + 1  # append_row always adds after the last fetched row
         _remove_bold(ws, f"A{new_row_idx}:{END_COL}{new_row_idx}")
         print(f"Appended new row for issue #{issue_number} in {repo} "
