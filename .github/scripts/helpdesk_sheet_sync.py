@@ -446,6 +446,28 @@ def main() -> None:
     issue_url        = issue["html_url"]
     issue_author     = issue["user"]["login"]
     issue_created_at = issue["created_at"]
+
+    # Refresh state/closed_at from the live API: the event payload is a
+    # snapshot from when the event fired, so a 'labeled' event generated
+    # while the issue was still open can arrive after the 'closed' event and
+    # (via cancel-in-progress) overwrite the sheet with stale "Open" state.
+    try:
+        live = requests.get(
+            f"https://api.github.com/repos/{os.environ['REPO_OWNER']}/{os.environ['REPO_NAME']}/issues/{issue_number}",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Accept": "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
+            timeout=30,
+        )
+        live.raise_for_status()
+        live_data = live.json()
+        issue["state"]     = live_data["state"]
+        issue["closed_at"] = live_data.get("closed_at")
+    except Exception as exc:
+        print(f"Warning: could not refresh issue state from API, using event payload: {exc}")
+
     issue_closed_at  = issue.get("closed_at") or ""
     issue_state      = issue["state"]
     issue_body       = issue.get("body") or ""
