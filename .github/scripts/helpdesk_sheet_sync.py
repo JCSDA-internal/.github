@@ -453,7 +453,7 @@ def main() -> None:
     # (via cancel-in-progress) overwrite the sheet with stale "Open" state.
     try:
         live = requests.get(
-            f"https://api.github.com/repos/{os.environ['REPO_OWNER']}/{os.environ['REPO_NAME']}/issues/{issue_number}",
+            f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}",
             headers={
                 "Authorization": f"Bearer {token}",
                 "Accept": "application/vnd.github+json",
@@ -584,8 +584,9 @@ def main() -> None:
               f"(event: {event_action}, status: {status})")
     else:
         _sheet_write_with_retry(ws.append_row, row, value_input_option="USER_ENTERED")
-        new_row_idx = len(all_rows) + 1  # append_row always adds after the last fetched row
-        _remove_bold(ws, f"A{new_row_idx}:{END_COL}{new_row_idx}")
+        new_row_idx = find_issue_row(ws, repo, issue_number)
+        if new_row_idx is not None:
+            _remove_bold(ws, f"A{new_row_idx}:{END_COL}{new_row_idx}")
         print(f"Appended new row for issue #{issue_number} in {repo} "
               f"(event: {event_action})")
 
