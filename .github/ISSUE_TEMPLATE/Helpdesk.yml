@@ -24,6 +24,7 @@ body:
       label: Requesting Organization
       description: Select the organization requesting assistance or project if applicable.
       options:
+        - Other
         - CADRE
         - FALCON
         - RRFS
@@ -36,7 +37,6 @@ body:
         - UKMO
         - University
         - USAF
-        - Other
     validations:
       required: true
 
