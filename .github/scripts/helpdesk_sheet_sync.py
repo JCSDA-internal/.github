@@ -35,8 +35,25 @@ import yaml
 
 import gspread
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # ── Retry helpers ────────────────────────────────────────────────────────────
+
+def _make_gh_session() -> requests.Session:
+    session = requests.Session()
+    retry = Retry(
+        total=3,
+        backoff_factor=0.5,
+        status_forcelist={500, 502, 503, 504},
+        allowed_methods={"GET", "POST"},
+    )
+    session.mount("https://", HTTPAdapter(max_retries=retry))
+    return session
+
+_GH_SESSION = _make_gh_session()
+
+
 
 _RETRY_ATTEMPTS = 5
 _RETRY_BASE     = 2.0   # seconds; doubles each attempt + jitter
@@ -203,7 +220,7 @@ def gh_assign(owner: str, repo: str, issue_number: int,
     """Add assignees to a GitHub issue."""
     url = (f"https://api.github.com/repos/{owner}/{repo}"
            f"/issues/{issue_number}/assignees")
-    resp = requests.post(
+    resp = _GH_SESSION.post(
         url,
         headers={
             "Authorization": f"Bearer {token}",
@@ -409,7 +426,7 @@ def get_estimate_from_project(owner: str, repo: str, issue_number: int, token: s
       }
     }
     """
-    resp = requests.post(
+    resp = _GH_SESSION.post(
         "https://api.github.com/graphql",
         headers={
             "Authorization": f"Bearer {token}",
@@ -460,7 +477,7 @@ def main() -> None:
     # while the issue was still open can arrive after the 'closed' event and
     # (via cancel-in-progress) overwrite the sheet with stale "Open" state.
     try:
-        live = requests.get(
+        live = _GH_SESSION.get(
             f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}",
             headers={
                 "Authorization": f"Bearer {token}",
