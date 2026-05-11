@@ -270,11 +270,11 @@ def _setup_header_rows(ws: "gspread.Worksheet", sa_email: str = "") -> None:
     is added as an editor so automation can still reinitialise if needed.
     """
     sh = ws.spreadsheet
-    requests = []
+    batch_requests = []
 
     # Merge row-1 cells within each section
     for _, start_col, end_col in _SECTIONS:
-        requests.append({
+        batch_requests.append({
             "mergeCells": {
                 "range": {
                     "sheetId": ws.id,
@@ -286,7 +286,7 @@ def _setup_header_rows(ws: "gspread.Worksheet", sa_email: str = "") -> None:
         })
 
     # Format row 1: bold, centred, light-blue background
-    requests.append({
+    batch_requests.append({
         "repeatCell": {
             "range": {
                 "sheetId": ws.id,
@@ -303,7 +303,7 @@ def _setup_header_rows(ws: "gspread.Worksheet", sa_email: str = "") -> None:
     })
 
     # Format row 2: bold, light-grey background
-    requests.append({
+    batch_requests.append({
         "repeatCell": {
             "range": {
                 "sheetId": ws.id,
@@ -320,7 +320,7 @@ def _setup_header_rows(ws: "gspread.Worksheet", sa_email: str = "") -> None:
 
     # Lock rows 1–2; service account retains edit rights, everyone else sees a hard lock
     editors_payload = {"users": [sa_email]} if sa_email else {}
-    requests.append({
+    batch_requests.append({
         "addProtectedRange": {
             "protectedRange": {
                 "range": {"sheetId": ws.id, "startRowIndex": 0, "endRowIndex": 2},
@@ -331,7 +331,7 @@ def _setup_header_rows(ws: "gspread.Worksheet", sa_email: str = "") -> None:
         }
     })
 
-    sh.batch_update({"requests": requests})
+    sh.batch_update({"requests": batch_requests})
 
     # Write section labels after merging so they land in the first cell of each region
     for label, start_col, _ in _SECTIONS:
