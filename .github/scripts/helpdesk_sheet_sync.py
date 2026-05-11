@@ -189,7 +189,7 @@ def match_org(requesting_org: str, org_map: dict) -> str | None:
     if org_lower in _NO_ORG_FIELD_VALUES:
         return default
     for key, assignee in org_map.items():
-        if key.startswith("_") or key == "default_assignee":
+        if key.startswith("_") or key == "default_assignee":  # skip metadata keys (e.g. _readme)
             continue
         if key.lower() in org_lower or org_lower in key.lower():
             return assignee
@@ -218,10 +218,14 @@ def gh_assign(owner: str, repo: str, issue_number: int,
 
 # ── Date helpers ──────────────────────────────────────────────────────────────
 
-def days_between(a_iso: str, b_iso: str) -> float:
-    a = datetime.datetime.fromisoformat(a_iso)
-    b = datetime.datetime.fromisoformat(b_iso)
-    return round((b - a).total_seconds() / 86400.0, 2)
+def days_between(a_iso: str, b_iso: str) -> str:
+    try:
+        a = datetime.datetime.fromisoformat(a_iso)
+        b = datetime.datetime.fromisoformat(b_iso)
+        return str(round((b - a).total_seconds() / 86400.0, 2))
+    except ValueError as exc:
+        print(f"Warning: could not compute time_to_close ({a_iso!r}, {b_iso!r}): {exc}")
+        return ""
 
 
 # ── Google Sheets helpers ─────────────────────────────────────────────────────
@@ -520,8 +524,7 @@ def main() -> None:
 
     # ── Computed fields ───────────────────────────────────────────────────────
     status         = "Closed" if issue_state == "closed" else "Open"
-    time_to_close  = (str(days_between(issue_created_at, issue_closed_at))
-                      if issue_closed_at else "")
+    time_to_close  = days_between(issue_created_at, issue_closed_at) if issue_closed_at else ""
 
     # ── Open the worksheet and locate any existing row ────────────────────────
     ws       = open_worksheet(sheet_id, creds_dict)
