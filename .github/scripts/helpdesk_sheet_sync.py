@@ -122,7 +122,9 @@ def extract_field(body: str, section_title: str) -> str:
     """
     pattern = rf'^###\s+{re.escape(section_title)}\s*\n+([^\n]+)'
     m = re.search(pattern, body or "", re.MULTILINE)
-    return m.group(1).strip() if m else ""
+    if not m:
+        return ""
+    return m.group(1).strip()
 
 
 def _section_body(body: str, section_title: str) -> str | None:
@@ -137,7 +139,9 @@ def extract_section(body: str, section_title: str) -> str:
     '###' header or end of body, with leading/trailing whitespace stripped.
     """
     text = _section_body(body, section_title)
-    return text.strip() if text is not None else ""
+    if not text:
+        return ""
+    return text.strip()
 
 
 def extract_checked_items(body: str, section_title: str) -> str:
@@ -171,7 +175,7 @@ def load_field_placeholder(template_path: str, field_id: str) -> str:
 
 # ── Org → assignee lookup ─────────────────────────────────────────────────────
 
-_PLACEHOLDER_ORGS = {"na", "n/a", "none", "unknown", "n.a.", "not applicable", ""}
+_NO_ORG_FIELD_VALUES = {"na", "n/a", "none", "unknown", "n.a.", "not applicable", ""}
 
 def match_org(requesting_org: str, org_map: dict) -> str | None:
     """
@@ -182,7 +186,7 @@ def match_org(requesting_org: str, org_map: dict) -> str | None:
     """
     default = org_map.get("default_assignee")
     org_lower = requesting_org.lower().strip()
-    if org_lower in _PLACEHOLDER_ORGS:
+    if org_lower in _NO_ORG_FIELD_VALUES:
         return default
     for key, assignee in org_map.items():
         if key.startswith("_") or key == "default_assignee":
