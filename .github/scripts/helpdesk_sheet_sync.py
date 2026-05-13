@@ -196,9 +196,8 @@ _NO_ORG_FIELD_VALUES = {"na", "n/a", "none", "unknown", "n.a.", "not applicable"
 
 def match_org(requesting_org: str, org_map: dict) -> str | None:
     """
-    Case-insensitive substring match: org_map key appears in requesting_org,
-    or requesting_org appears in the key.  Falls back to org_map['default_assignee']
-    when no specific match is found (including placeholder/unknown org values).
+    Exact match against org_map keys (case-insensitive).  Falls back to
+    org_map['default_assignee'] when no match is found.
     Returns the GitHub username or None.
     """
     default = org_map.get("default_assignee")
@@ -206,9 +205,9 @@ def match_org(requesting_org: str, org_map: dict) -> str | None:
     if org_lower in _NO_ORG_FIELD_VALUES:
         return default
     for key, assignee in org_map.items():
-        if key.startswith("_") or key == "default_assignee":  # skip metadata keys (e.g. _readme)
+        if key.startswith("_") or key == "default_assignee":   # skip metadata keys (e.g. _readme)
             continue
-        if key.lower() in org_lower or org_lower in key.lower():
+        if key.lower() == org_lower:
             return assignee
     return default
 
