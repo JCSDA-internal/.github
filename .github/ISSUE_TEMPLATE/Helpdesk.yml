@@ -18,12 +18,24 @@ body:
     validations:
       required: true
 
-  - type: textarea
+  - type: dropdown
     id: requesting_org
     attributes:
       label: Requesting Organization
-      description: Specify the organization and, if applicable, the specific division, branch, or office requesting assistance.
-      placeholder: "e.g., University, NOAA/NWS/EMC, NRL Monterey, NASA/GMAO"
+      description: Select the organization requesting assistance or project if applicable.
+      options:
+        - CADRE
+        - NRL-FALCON
+        - NRL-Space Weather
+        - OAR-RRFS
+        - OAR-EPIC
+        - MMM
+        - NASA
+        - NESDIS
+        - NWS
+        - UKMO
+        - USAF
+        - Other
     validations:
       required: true
 
