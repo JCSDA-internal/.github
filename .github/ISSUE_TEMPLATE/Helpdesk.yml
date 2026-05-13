@@ -24,19 +24,18 @@ body:
       label: Requesting Organization
       description: Select the organization requesting assistance or project if applicable.
       options:
-        - Other
         - CADRE
-        - FALCON
-        - RRFS
+        - NRL-FALCON
+        - NRL-Space Weather
+        - OAR-RRFS
+        - OAR-EPIC
         - MMM
         - NASA
-        - Navy
         - NESDIS
         - NWS
-        - OAR-EPIC
         - UKMO
-        - University
         - USAF
+        - Other
     validations:
       required: true
 
