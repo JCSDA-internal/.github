@@ -181,7 +181,7 @@ body:
         - Dataset/sample:
         - Not applicable
     validations:
-      required: true
+      required: false
 
   #- type: dropdown
   #  id: estimate
@@ -273,9 +273,8 @@ body:
       label: Resolution Description
       description: "Maintainers: summarize what fixed or addressed the issue. Include links to PRs, commits, docs, or guidance given."
       value: |
-        Maintainers: summarize what fixed or addressed the issue.
-        Include links to PRs, commits, docs, or guidance given.
-        Example: Root cause + fix/workaround + references
-          (e.g., PR #123, pointed to docs at X, user environment issue resolved by Y)
+        <!-- Example: Root cause + fix/workaround + references
+            e.g., PR #123, pointed to docs at X, user environment issue resolved by Y
+            DELETE THIS COMMENT WHEN UPDATING -->
     validations:
       required: false
