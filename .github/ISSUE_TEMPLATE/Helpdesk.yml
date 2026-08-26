@@ -23,6 +23,7 @@ body:
       label: Requesting Organization
       description: Select the organization requesting assistance or project if applicable.
       options:
+        - Please Select...
         - CADRE
         - NRL-FALCON
         - NRL-Space Weather
@@ -44,6 +45,7 @@ body:
       label: Issue category (required for stats)
       description: Choose the best match.
       options:
+        - Please Select...
         - Build / environment / compatability
         - Runtime error
         # - Configuration question
@@ -62,6 +64,7 @@ body:
     attributes:
       label: Impact / priority
       options:
+        - Please Select...
         # - Blocking work
         - High (major slowdown)
         - Medium
@@ -75,6 +78,7 @@ body:
     attributes:
       label: Reproducibility
       options:
+        - Please Select...
         - Always reproducible
         - Intermittent
         - Not reproducible (yet)
@@ -87,6 +91,7 @@ body:
     attributes:
       label: Platform / system (select all that apply)
       options:
+        - Please Select...
         # - label: Hera
         - Orion / Hercules
         - Discover
